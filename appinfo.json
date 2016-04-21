@@ -1,0 +1,56 @@
+{
+  "uuid": "68083d95-f477-47ed-b31e-34a24ca6d792",
+  "shortName": "pebble-countit-all",
+  "longName": "pebble-countit-all",
+  "companyName": "Salmenrinne",
+  "versionLabel": "1.0",
+  "sdkVersion": "3",
+  "targetPlatforms": ["aplite", "basalt", "chalk"],
+  "enableMultiJS": true,
+  "watchapp": {
+    "watchface": false
+  },
+  "appKeys": {
+    "dummy": 0
+  },
+  "resources": {
+    "media": [
+      {
+        "file": "images/moonaction.png",
+        "name": "ACTION_MOON",
+        "type": "png"
+      },
+      {
+        "file": "images/diaperaction.png",
+        "name": "ACTION_DIAPER",
+        "type": "png"
+      },
+      {
+        "file": "images/bottleaction.png",
+        "name": "ACTION_BOTTLE",
+        "type": "png"
+      },
+      {
+        "file": "images/icon.png",
+        "menuIcon": true,
+        "name": "IMAGE_ICON",
+        "type": "png"
+      },
+      {
+        "file": "images/moon.png",
+        "name": "IMAGE_MOON",
+        "type": "png-trans"
+      },
+      {
+        "file": "images/diaper.png",
+        "name": "IMAGE_DIAPER",
+        "type": "png-trans"
+      },
+      {
+        "file": "images/bottle.png",
+        "name": "IMAGE_BOTTLE",
+        "type": "png-trans"
+      }
+    ]
+  }
+}
