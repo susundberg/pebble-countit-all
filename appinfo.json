@@ -35,21 +35,6 @@
         "menuIcon": true,
         "name": "IMAGE_ICON",
         "type": "png"
-      },
-      {
-        "file": "images/moon.png",
-        "name": "IMAGE_MOON",
-        "type": "png-trans"
-      },
-      {
-        "file": "images/diaper.png",
-        "name": "IMAGE_DIAPER",
-        "type": "png-trans"
-      },
-      {
-        "file": "images/bottle.png",
-        "name": "IMAGE_BOTTLE",
-        "type": "png-trans"
       }
     ]
   }

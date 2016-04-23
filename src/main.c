@@ -9,6 +9,7 @@
 
 
 static Window *LOCAL_window_main;
+static Window *LOCAL_window_menu;
 
 
 static void local_time_event_handler(struct tm *tick_time, TimeUnits units_changed)
@@ -29,13 +30,21 @@ static void local_init()
     .load   = main_window_load,
     .unload = main_window_unload
     });
+  LOCAL_window_menu = window_create();
+  window_set_window_handlers(LOCAL_window_menu, (WindowHandlers) {
+    .load   = menu_window_load,
+    .unload = menu_window_unload
+    });
   
-  window_set_click_config_provider(LOCAL_window_main, click_config_provider);
   window_stack_push(LOCAL_window_main, true);
-  
-  
 }
 
+void main_show_menu_window( unsigned int index )
+{
+   APP_LOG( APP_LOG_LEVEL_INFO, "SHOW menu for %d", index );
+   menu_window_set_data( index );
+   window_stack_push(LOCAL_window_menu, true);
+}
 
 static void local_deinit() 
 {

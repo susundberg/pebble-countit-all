@@ -4,15 +4,8 @@
 #include <assert.h>
 #include "main.h"
 
-#define BUTTON_N_INDEX 3
-#define BUFFER_SIZE 32
 
-typedef struct __attribute__ ((__packed__))
-{
-   uint32_t time;
-   uint16_t elapsed;
-   
-} ButtonRegistryBuffer;
+
 
 typedef struct
 {
@@ -26,6 +19,17 @@ typedef struct
 } ButtonRegistry;
 
 ButtonRegistry LOCAL_registry[ BUTTON_N_INDEX ];
+
+const ButtonRegistryBuffer* click_registry_get_action( unsigned int index, unsigned int loop )
+{
+   ButtonRegistry* reg = &LOCAL_registry[index];
+   
+   unsigned int current_index = (2*BUFFER_SIZE + (reg->buffer_loop - 1) - loop)%BUFFER_SIZE;
+   
+   if (reg->buffer[ current_index ].time == 0 )
+      return NULL;
+   return &reg->buffer[ current_index ];
+}
 
 
 const ButtonRegistryBuffer* local_get_last_action( const ButtonRegistry* reg )
@@ -58,6 +62,13 @@ static void local_click_handler_single_action( ClickRecognizerRef recognizer, vo
 
   local_new_action( reg, time_now, 0xFFFF );
   main_window_update_elapsed( time_now );
+}
+
+
+static void local_click_open_menu(ClickRecognizerRef recognizer, void *context) 
+{
+   unsigned int button_index = (unsigned int) context;
+   main_show_menu_window( button_index );
 }
 
 
@@ -101,18 +112,26 @@ static void local_click_config_provider_wrapper(  ButtonId button_id, void* cont
   
   APP_LOG( APP_LOG_LEVEL_DEBUG, "Register button %d %d", button_index, flags );
   
+  bool enabled = false;
+  
   if ( flags & FLAG_SINGLE_ACTION_BUTTON )
   {
      window_single_click_subscribe( button_id, local_click_handler_single_action ); // single click
+     enabled = true;
   }
   if ( flags & FLAG_LONG_ACTION_BUTTON )
   {
      window_single_click_subscribe( button_id, local_click_handler_long_action ); // single click
+     enabled = true;
   }
   
-  // long click opens menu 
-  // window_long_click_subscribe( button_id, 0, NULL, local_click_handler_long ); // long click, call on up
-     
+  
+  if ( enabled )
+  {
+     // long click opens menu 
+     window_long_click_subscribe( button_id, 0, NULL, local_click_open_menu ); // long click, call on up
+  }
+  
   window_set_click_context( button_id, context);
 }
 
@@ -127,6 +146,33 @@ void click_config_provider( )
 }
 
 
+ButtonId click_get_button_id_from_index(int index)
+{
+   return (ButtonId)(index + 1);
+}
+
+
+
+void local_load_buffer_from_storage( ButtonRegistry* reg, uint32_t key_offset )
+{
+   
+   uint32_t loop = 0 ;
+   for ( loop = 0; loop < BUFFER_SIZE; loop ++ )
+   {
+      int ret = persist_read_data( key_offset + loop + 1, &reg->buffer[loop], sizeof(ButtonRegistryBuffer) );
+      if ( ret == E_DOES_NOT_EXIST )
+         break;
+   }
+   
+   if ( loop > 0 )
+   {
+     reg->buffer_loop = persist_read_int( key_offset ); 
+   }
+   
+}
+
+     
+
 void click_registry_init()
 {
    memset( LOCAL_registry, 0x00, sizeof(LOCAL_registry));
@@ -134,11 +180,31 @@ void click_registry_init()
    
    for (int loop = 0; loop < BUTTON_N_INDEX; loop ++ )
    {
-      LOCAL_registry[loop].button_id = (ButtonId)(loop + 1);
+      LOCAL_registry[loop].button_id = click_get_button_id_from_index( loop );
       LOCAL_registry[loop].flags = config_get( LOCAL_registry[loop].button_id );
+   
+      local_load_buffer_from_storage( &LOCAL_registry[loop], PERSISTANT_STORAGE_DATA_START + (BUFFER_SIZE + 1)*loop );
+      
+      
+      
    } 
+   
+   
+   
 }
 
+bool click_registry_enabled( unsigned int index )
+{
+   ButtonRegistry* reg = &LOCAL_registry[index];  
+
+   if ( ( reg->flags & FLAG_LONG_ACTION_BUTTON ) != 0x00 )
+      return true;
+   
+   if ( ( reg->flags & FLAG_SINGLE_ACTION_BUTTON ) != 0x00 )
+      return true;
+   
+   return false;
+}
 
 bool click_registry_get_elapsed( time_t time_now, unsigned int index, unsigned int* elapsed )
 {
