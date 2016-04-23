@@ -11,6 +11,7 @@
 #define BUFFER_SIZE 32
 
 
+#define PERSISTANT_STORAGE_DATA_START  1000
 
 void main_show_menu_window(unsigned int index);
 
@@ -37,6 +38,11 @@ bool click_registry_get_elapsed( time_t time_now, unsigned int index, unsigned i
 bool click_registry_get_since_last( time_t time_now, unsigned int index, unsigned int* elapsed );
 /** @returns button id from index */
 ButtonId click_get_button_id_from_index( int index );
+
+/** Clear the @param loop entry from the @param index registry buffer */
+void click_registry_clear( unsigned int index, unsigned int loop );
+/** Finish it */
+void click_registry_clear_finish( unsigned int index );
 
 /** @returns the @param loop 'th action from the @param index buffer or NULL if the action has not been taken */
 const ButtonRegistryBuffer* click_registry_get_action( unsigned int index, unsigned int loop );

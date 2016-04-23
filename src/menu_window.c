@@ -1,5 +1,5 @@
 #include <pebble.h>
-// #include <assert.h>
+#include <assert.h>
 
 #include "main.h"
 
@@ -14,12 +14,23 @@ char   LOCAL_menu_texts[ BUFFER_SIZE * MENU_ENTRY_SIZE];
 char   LOCAL_menu_texts_small[ BUFFER_SIZE * MENU_ENTRY_SIZE]; 
 char   LOCAL_menu_title[MENU_TITLE_MAX_SIZE];
 
+static const char* LOCAL_menu_subtitle_delete = "DELETE"  ;
+static const char* LOCAL_menu_title_none = " - ";
+
 static void local_menu_callback(int index, void *ctx) 
 {
-   
-  LOCAL_menu_items[index].subtitle = "MARK";
+  
+  if ( LOCAL_menu_items[index].subtitle == NULL )
+  {
+     LOCAL_menu_items[index].subtitle = LOCAL_menu_subtitle_delete ;
+  }
+  else
+  {
+     LOCAL_menu_items[index].subtitle = NULL;
+  }
   layer_mark_dirty(simple_menu_layer_get_layer(LOCAL_layer_menu));
 }
+
 
 static unsigned int LOCAL_data_index ;
 
@@ -43,7 +54,7 @@ void local_load_data( )
       const ButtonRegistryBuffer* buffer = click_registry_get_action( LOCAL_data_index, loop );
       if ( buffer == NULL )
       {
-        LOCAL_menu_items[loop].title    = " - ";
+        LOCAL_menu_items[loop].title    = LOCAL_menu_title_none ;
         LOCAL_menu_items[loop].subtitle = NULL;
       }
       else
@@ -51,7 +62,8 @@ void local_load_data( )
          time_t time_seconds_epoc = buffer->time;
          struct tm* time_splitted = localtime(&time_seconds_epoc);
          char* string_title = LOCAL_menu_texts + MENU_ENTRY_SIZE*loop;
-         strftime( string_title , MENU_ENTRY_SIZE, "%m-%d %H:%M", time_splitted );
+//          strftime( string_title , MENU_ENTRY_SIZE, "%m-%d %H:%M:%S", time_splitted );
+         strftime( string_title , MENU_ENTRY_SIZE, "%H:%M:%S", time_splitted );
          LOCAL_menu_items[loop].title = string_title;
          
          nvalids += 1;
@@ -64,18 +76,15 @@ void local_load_data( )
             unsigned int minutes;
             unsigned int seconds = buffer->elapsed;
             get_time_splitted( &hours, &minutes, &seconds);
-            int ret = snprintf( subtitle, MENU_ENTRY_SIZE, "D: %d:%d:%d", hours, minutes, seconds );
-                     
+            snprintf( subtitle, MENU_ENTRY_SIZE, "D: %02d:%02d:%02d", hours, minutes, seconds );
             LOCAL_menu_items[loop].subtitle = subtitle;
-//             total_duration += buffer->elapsed;
          }
          
       }
       APP_LOG( APP_LOG_LEVEL_INFO, "Menu entry %d - %s", loop, LOCAL_menu_items[loop].title );
    }
    
-   int ret = snprintf( LOCAL_menu_title, MENU_TITLE_MAX_SIZE, "Actions: %d", (int)nvalids );
-//    assert( ret > 0 && ret <= MENU_TITLE_MAX_SIZE );
+   snprintf( LOCAL_menu_title, MENU_TITLE_MAX_SIZE, "Actions: %d", (int)nvalids );
 }
 
 
@@ -100,5 +109,17 @@ void menu_window_load(Window *window)
 void menu_window_unload(Window *window) 
 {
    simple_menu_layer_destroy( LOCAL_layer_menu );
+
+   for (int loop = 0; loop < BUFFER_SIZE; loop ++ )
+   {
+      if ( LOCAL_menu_items[loop].title == LOCAL_menu_title_none )
+         break;
+      
+      if ( LOCAL_menu_items[loop].subtitle != NULL )
+      { // marked for deletion
+         click_registry_clear( LOCAL_data_index, loop );
+      }
+   }
+   click_registry_clear_finish( LOCAL_data_index );
 }
 
