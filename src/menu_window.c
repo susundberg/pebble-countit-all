@@ -3,7 +3,7 @@
 
 #include "main.h"
 
-#define MENU_ENTRY_SIZE 12
+#define MENU_ENTRY_SIZE 16
 #define MENU_TITLE_MAX_SIZE 32
 
 
@@ -63,7 +63,8 @@ void local_load_data( )
          struct tm* time_splitted = localtime(&time_seconds_epoc);
          char* string_title = LOCAL_menu_texts + MENU_ENTRY_SIZE*loop;
 //          strftime( string_title , MENU_ENTRY_SIZE, "%m-%d %H:%M:%S", time_splitted );
-         strftime( string_title , MENU_ENTRY_SIZE, "%H:%M:%S", time_splitted );
+         // 24.12. 12:32:12
+         strftime( string_title , MENU_ENTRY_SIZE, "%m.%d. %H:%M:%S", time_splitted );
          LOCAL_menu_items[loop].title = string_title;
          
          nvalids += 1;
