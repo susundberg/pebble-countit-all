@@ -33,9 +33,9 @@ void click_registry_init();
 /** @return true if the button is enabled */
 bool click_registry_enabled( unsigned int index );
 /** @return true if the @param elapsed has been updated to contain duration seconds on the @param index button */
-bool click_registry_get_elapsed( time_t time_now, unsigned int index, unsigned int* elapsed );
+bool click_registry_get_elapsed( time_t time_now, unsigned int index, unsigned int* elapsed, unsigned int* action_time );
 /** @return true if the @param elapsed has been updated as above but for since last action */
-bool click_registry_get_since_last( time_t time_now, unsigned int index, unsigned int* elapsed );
+bool click_registry_get_since_last( time_t time_now, unsigned int index, unsigned int* elapsed, unsigned int* action_time );
 /** @returns button id from index */
 ButtonId click_get_button_id_from_index( int index );
 

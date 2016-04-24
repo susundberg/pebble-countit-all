@@ -240,7 +240,7 @@ bool click_registry_enabled( unsigned int index )
    return false;
 }
 
-bool click_registry_get_elapsed( time_t time_now, unsigned int index, unsigned int* elapsed )
+bool click_registry_get_elapsed( time_t time_now, unsigned int index, unsigned int* elapsed, unsigned int* action_time )
 {
    ButtonRegistry* reg = &LOCAL_registry[index];  
 
@@ -249,14 +249,15 @@ bool click_registry_get_elapsed( time_t time_now, unsigned int index, unsigned i
    
    if ( reg->time_started > 0 )
    {
-      (*elapsed) = (unsigned int)time_now - (unsigned int)reg->time_started;
+      (*elapsed)     = (unsigned int)time_now - (unsigned int)reg->time_started;
+      (*action_time) = (unsigned int)reg->time_started;
       return true;
    }
    return false; 
 }
 
 
-bool click_registry_get_since_last( time_t time_now, unsigned int index, unsigned int* elapsed )
+bool click_registry_get_since_last( time_t time_now, unsigned int index, unsigned int* elapsed, unsigned int* action_time )
 {
    ButtonRegistry* reg = &LOCAL_registry[index];
    const ButtonRegistryBuffer* loop = local_get_last_action( reg );
@@ -264,6 +265,7 @@ bool click_registry_get_since_last( time_t time_now, unsigned int index, unsigne
       return false;
    
    *elapsed = (unsigned int)time_now - (unsigned int)loop->time;
+   *action_time = (unsigned int)loop->time;
    return true;
 }
 
