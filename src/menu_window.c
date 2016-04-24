@@ -20,7 +20,7 @@ static const char* LOCAL_menu_title_none = " - ";
 static void local_menu_callback(int index, void *ctx) 
 {
   
-  if ( LOCAL_menu_items[index].subtitle == NULL )
+  if ( LOCAL_menu_items[index].subtitle != LOCAL_menu_subtitle_delete )
   {
      LOCAL_menu_items[index].subtitle = LOCAL_menu_subtitle_delete ;
   }
@@ -116,7 +116,7 @@ void menu_window_unload(Window *window)
       if ( LOCAL_menu_items[loop].title == LOCAL_menu_title_none )
          break;
       
-      if ( LOCAL_menu_items[loop].subtitle != NULL )
+      if ( LOCAL_menu_items[loop].subtitle == LOCAL_menu_subtitle_delete )
       { // marked for deletion
          click_registry_clear( LOCAL_data_index, loop );
       }
