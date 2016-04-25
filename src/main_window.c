@@ -21,25 +21,45 @@ static StatusBarLayer* LOCAL_status_bar;
 static GBitmap* LOCAL_icon[3];
 static const uint32_t RESOURCE_ICONS[] = { RESOURCE_ID_ACTION_BOTTLE, RESOURCE_ID_ACTION_DIAPER, RESOURCE_ID_ACTION_MOON };
 
+
+static void local_set_layer_color_inverted( unsigned int index, bool inverted )
+{
+  GColor front = GColorWhite;
+  GColor back  = GColorBlack;
+  
+  if  ( inverted == false )
+  {
+     back  = GColorWhite;
+     front = GColorBlack;
+  }
+
+  text_layer_set_background_color( LOCAL_layers[index].layer, back );
+  text_layer_set_text_color( LOCAL_layers[index].layer , front );
+  text_layer_set_background_color( LOCAL_layers_small[index].layer, back );
+  text_layer_set_text_color( LOCAL_layers_small[index].layer , front );
+}
+
 static void local_create_layer( Layer* window_layer, GRect* window_bounds, unsigned int index  )
 {
-  unsigned int layer_size   = 42;
-  unsigned int layer_small  = 10;
-  unsigned int layer_padding = 4;
+  unsigned int layer_size   = 52;
+  unsigned int layer_small  = 24;
+  unsigned int layer_padding = 0;
   unsigned int offset_h   = STATUS_BAR_LAYER_HEIGHT + index * layer_size;
   
   offset_h = offset_h + index*layer_padding;
   
-  TextLayer* tlayer = text_layer_create(GRect(0, offset_h, window_bounds->size.w - ACTION_BAR_WIDTH, layer_size ));
-  text_layer_set_font( tlayer , fonts_get_system_font(FONT_KEY_LECO_32_BOLD_NUMBERS));
-
-  layer_add_child(window_layer, text_layer_get_layer(tlayer ));
+  TextLayer* tlayer = text_layer_create(GRect(0, offset_h, window_bounds->size.w - ACTION_BAR_WIDTH, layer_size - layer_small));
+  text_layer_set_font( tlayer , fonts_get_system_font(FONT_KEY_LECO_26_BOLD_NUMBERS_AM_PM));  
   text_layer_set_text_alignment( tlayer, GTextAlignmentRight );
   LOCAL_layers[ index ].layer = tlayer; 
-
+  layer_add_child(window_layer, text_layer_get_layer(tlayer ));
+  
   tlayer = text_layer_create(GRect(0, offset_h + (layer_size  - layer_small) , window_bounds->size.w - ACTION_BAR_WIDTH, layer_small ));
   text_layer_set_font( tlayer , fonts_get_system_font(FONT_KEY_GOTHIC_18));
   LOCAL_layers_small[ index ].layer = tlayer; 
+  layer_add_child(window_layer, text_layer_get_layer(tlayer ));
+  text_layer_set_text_alignment( tlayer, GTextAlignmentCenter );  
+  local_set_layer_color_inverted( index, true );
 }
 
 
@@ -85,9 +105,11 @@ void get_time_splitted( unsigned int* hour, unsigned int* min, unsigned* sec )
 void local_show_running_time( BufferedTextLayer* blayer, unsigned int sec  )
 {
   unsigned int min;
-  get_time_splitted( NULL, &min, &sec ); 
+  unsigned int hour;
+  get_time_splitted( &hour, &min, &sec ); 
   
-  CHECK_BUFFER_PRINT( snprintf( blayer->buffer, TEXT_BUFFER_SIZE, "%02u:%02u", min, sec) );
+  CHECK_BUFFER_PRINT( snprintf( blayer->buffer, TEXT_BUFFER_SIZE, "%02u:%02u:%02u", hour, min, sec) );
+  
   text_layer_set_text( blayer->layer, blayer->buffer );
   layer_mark_dirty(text_layer_get_layer(blayer->layer));
 }
@@ -153,19 +175,24 @@ void main_window_unload(Window *window)
 
 
 
-static void local_set_layer_color_inverted( unsigned int index, bool inverted )
-{
-  GColor front = GColorWhite;
-  GColor back  = GColorBlack;
-  
-  if  ( inverted == true )
-  {
-     back  = GColorWhite;
-     front = GColorBlack;
-  }
 
-  text_layer_set_background_color( LOCAL_layers[index].layer, back );
-  text_layer_set_text_color( LOCAL_layers[index].layer , front );
+void local_show_verbose_running_time( BufferedTextLayer* blayer, const char* prefix, unsigned int time_since, const char* postfix )
+{
+  unsigned int min;
+  unsigned int hour;
+  get_time_splitted( &hour, &min, &time_since); 
+  
+  if ( hour == 0 )
+  {
+     CHECK_BUFFER_PRINT( snprintf( blayer->buffer, TEXT_BUFFER_SIZE, "%dmin ago", min ) );
+  }
+  else
+  {
+     CHECK_BUFFER_PRINT( snprintf( blayer->buffer, TEXT_BUFFER_SIZE, "%dh %dmin ago", hour, min ) );
+  }
+     
+   text_layer_set_text( blayer->layer, blayer->buffer );
+   layer_mark_dirty(text_layer_get_layer(blayer->layer));
 }
 
 void main_window_update_elapsed( time_t time_now )
@@ -173,28 +200,21 @@ void main_window_update_elapsed( time_t time_now )
    
    for ( int loop = 0 ; loop < N_LAYERS ; loop ++ )
    {
-      unsigned int show_sec;
+      unsigned int elapsed_sec;
       unsigned int time_started;
-      if ( click_registry_get_elapsed( time_now, loop, &show_sec, &time_started ) == true )
+      if ( click_registry_get_elapsed( time_now, loop, &elapsed_sec, &time_started ) == true )
       {
-         local_set_layer_color_inverted(loop, true);
-         local_show_running_time( &LOCAL_layers[loop], show_sec );
+         local_show_running_time( &LOCAL_layers[loop], elapsed_sec );
          local_show_datetime(  &LOCAL_layers_small[loop], "Started at ", time_started, "" );
       }
-      else if ( click_registry_get_since_last( time_now, loop, &show_sec, &time_started ) == true ) 
+      else if ( click_registry_get_since_last( time_now, loop, &elapsed_sec, &time_started ) == true ) 
       {
-         local_set_layer_color_inverted(loop, false);
          local_show_datetime(  &LOCAL_layers[loop], "", time_started, "" );
-         local_show_verbose_running_time(  &LOCAL_layers_small[loop], "Last ", time_started, " ago" );
+         local_show_verbose_running_time(  &LOCAL_layers_small[loop], "Last ", elapsed_sec, " ago" );
       }
       else if ( click_registry_enabled( loop ) == true )
       {
-         local_set_layer_color_inverted(loop, false);  
          text_layer_set_text( LOCAL_layers[loop].layer, "   -   " );
-      }
-      else
-      {
-         local_set_layer_color_inverted(loop, false);
       }
    }
 }
