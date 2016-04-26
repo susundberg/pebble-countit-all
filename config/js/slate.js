@@ -157,9 +157,10 @@ var layout  = [
             grid += grid_loop;    
           }
         }
-        //console.log("FULL GRID" + grid );
+        
         var $injectedColor = $('<div class="item-styled-color">' +
-          '<img class="main_imgshow" src="images/' + $color.val() + '" style="background:black;">' +
+          '<img class="value" src="images/' + $color.val() + '" style="background:black;width:32px;height:32px;"></img>' +
+//           '<img class="main_imgshow" src="images/' + $color.val() + '" style="background:black;">' +
           '<div ' +
               'style="padding-bottom:' + boxHeight + '%"' +
               'class="color-box-wrap">' +
@@ -170,7 +171,7 @@ var layout  = [
         '</div>');
         $item.append($injectedColor);
 
-        var $valueDisplay = $injectedColor.find('.main_imgshow');
+        var $valueDisplay = $injectedColor.find('.value')[0];
 
         $color.on('click', function(ev) {
           $item.find('.color-box-wrap').toggleClass('show');
@@ -179,11 +180,12 @@ var layout  = [
         $item.find('.color-box.selectable').on('click', function(ev) {
           ev.preventDefault();
 
-          console.log("CLICKED ON" + $valueDisplay[0] );
-          var value = $(this);
-          console.log("CLICKED ON" + value );
+          var value = $(this).data('value');
+          console.log("CLICKED ON : " + value + "," + $valueDisplay );
           $color.val(value);
-          $valueDisplay[0].src = "images/" + value ;
+          $valueDisplay.src = "images/" + value;
+          
+//           $valueDisplay.css('background-color', value.replace(/^0x/, '#'));
           $item.find('.color-box-wrap').removeClass('show');
         })
 
@@ -321,7 +323,7 @@ var layout  = [
         $tab.click(function() {
           var $current = $(this);
           var name = $current.attr('name');
-
+          
           $('a[name=' + name + ']').each(function(){
             $(this).removeClass('active');
           });
