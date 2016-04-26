@@ -8,7 +8,7 @@
 
 
 #define BUTTON_N_INDEX 3
-#define BUFFER_SIZE 32
+#define HISTORY_SIZE   32
 
 
 #define PERSISTANT_STORAGE_DATA_START  1000

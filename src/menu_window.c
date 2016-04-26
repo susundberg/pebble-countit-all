@@ -9,9 +9,9 @@
 
 static SimpleMenuLayer*  LOCAL_layer_menu;;
 static SimpleMenuSection LOCAL_menu_section;
-static SimpleMenuItem    LOCAL_menu_items[BUFFER_SIZE];
-char   LOCAL_menu_texts[ BUFFER_SIZE * MENU_ENTRY_SIZE]; 
-char   LOCAL_menu_texts_small[ BUFFER_SIZE * MENU_ENTRY_SIZE]; 
+static SimpleMenuItem    LOCAL_menu_items[HISTORY_SIZE];
+char   LOCAL_menu_texts[ HISTORY_SIZE * MENU_ENTRY_SIZE]; 
+char   LOCAL_menu_texts_small[ HISTORY_SIZE * MENU_ENTRY_SIZE]; 
 char   LOCAL_menu_title[MENU_TITLE_MAX_SIZE];
 
 static const char* LOCAL_menu_subtitle_delete = "DELETE"  ;
@@ -49,7 +49,7 @@ void local_load_data( )
 //    uint32_t total_interval = 0;
    memset( LOCAL_menu_items, 0x00, sizeof(LOCAL_menu_items));
    
-   for (int loop = 0; loop < BUFFER_SIZE; loop ++ )
+   for (int loop = 0; loop < HISTORY_SIZE; loop ++ )
    {
       const ButtonRegistryBuffer* buffer = click_registry_get_action( LOCAL_data_index, loop );
       if ( buffer == NULL )
@@ -96,7 +96,7 @@ void menu_window_load(Window *window)
   GRect bounds = layer_get_frame(window_layer);
   
   LOCAL_menu_section.items = LOCAL_menu_items;
-  LOCAL_menu_section.num_items = BUFFER_SIZE;
+  LOCAL_menu_section.num_items = HISTORY_SIZE;
   LOCAL_menu_section.title = LOCAL_menu_title;
   local_load_data();
   
@@ -111,7 +111,7 @@ void menu_window_unload(Window *window)
 {
    simple_menu_layer_destroy( LOCAL_layer_menu );
 
-   for (int loop = 0; loop < BUFFER_SIZE; loop ++ )
+   for (int loop = 0; loop < HISTORY_SIZE; loop ++ )
    {
       if ( LOCAL_menu_items[loop].title == LOCAL_menu_title_none )
          break;

@@ -8,7 +8,7 @@
 
 typedef struct
 {
-  ButtonRegistryBuffer buffer[ BUFFER_SIZE ];
+  ButtonRegistryBuffer buffer[ HISTORY_SIZE ];
   uint32_t             buffer_loop;
   
 } ButtonRegistryHistory;
@@ -30,7 +30,7 @@ const ButtonRegistryBuffer* click_registry_get_action( unsigned int index, unsig
 {
    ButtonRegistry* reg = &LOCAL_registry[index];
    
-   unsigned int current_index = (2*BUFFER_SIZE + (reg->history.buffer_loop - 1) - loop)%BUFFER_SIZE;
+   unsigned int current_index = (2*HISTORY_SIZE + (reg->history.buffer_loop - 1) - loop)%HISTORY_SIZE;
    
    if (reg->history.buffer[ current_index ].time == 0 )
       return NULL;
@@ -41,10 +41,10 @@ const ButtonRegistryBuffer* click_registry_get_action( unsigned int index, unsig
 void click_registry_clear( unsigned int index, unsigned int loop )
 {
    ButtonRegistry* reg = &LOCAL_registry[index];
-   unsigned int buffer_index = (2*BUFFER_SIZE + (reg->history.buffer_loop - 1) - loop)%BUFFER_SIZE;
+   unsigned int buffer_index = (2*HISTORY_SIZE + (reg->history.buffer_loop - 1) - loop)%HISTORY_SIZE;
    
    memset( &reg->history.buffer[buffer_index], 0x00, sizeof( ButtonRegistryBuffer ) );
-   APP_LOG( APP_LOG_LEVEL_INFO, "Clearing entry %d (ind: %d)", (int)loop, (int)buffer_index );   
+//    APP_LOG( APP_LOG_LEVEL_INFO, "Clearing entry %d (ind: %d)", (int)loop, (int)buffer_index );   
 }
 
 void click_registry_clear_finish( unsigned int index)
@@ -54,27 +54,29 @@ void click_registry_clear_finish( unsigned int index)
    
    memset( &new_history, 0x00, sizeof(ButtonRegistryHistory));
    
-   unsigned int last_index = 2*BUFFER_SIZE - ( reg->history.buffer_loop - 1 ) - (BUFFER_SIZE - 1);
+   unsigned int last_index = reg->history.buffer_loop;
    APP_LOG( APP_LOG_LEVEL_INFO, "Clearing index from %d", (int)last_index);   
       
-   for ( unsigned int loop = 0; loop < BUFFER_SIZE; loop ++ )
+   for ( unsigned int loop = 0; loop < HISTORY_SIZE; loop ++ )
    {
-      unsigned int current_index = (last_index + loop) % BUFFER_SIZE ;
+      unsigned int current_index = (last_index + loop) % HISTORY_SIZE ;
+      
       if ( reg->history.buffer[ current_index ].time == 0 )
          continue;
       
       new_history.buffer[ new_history.buffer_loop ] = reg->history.buffer[ current_index ];
-      new_history.buffer_loop += 1;
+      new_history.buffer_loop = (new_history.buffer_loop + 1) % HISTORY_SIZE ;
    }
-   memcpy( &reg->history, &new_history, sizeof(ButtonRegistryHistory));
+    
+   reg->history = new_history; // shallow copy 
 }
 
 
 const ButtonRegistryBuffer* local_get_last_action( const ButtonRegistry* reg )
 {
    unsigned int buffer_prev = reg->history.buffer_loop - 1;
-   if ( buffer_prev >= BUFFER_SIZE )
-      buffer_prev = BUFFER_SIZE - 1;
+   if ( buffer_prev >= HISTORY_SIZE )
+      buffer_prev = HISTORY_SIZE - 1;
    
    const ButtonRegistryBuffer* ret = &reg->history.buffer[buffer_prev];
    if ( ret->time == 0 )
@@ -85,10 +87,11 @@ const ButtonRegistryBuffer* local_get_last_action( const ButtonRegistry* reg )
 
 static void local_new_action( ButtonRegistryHistory* reg, time_t time_now, uint16_t time_passed, ButtonId button )
 {
+   reg->buffer_loop = (reg->buffer_loop % HISTORY_SIZE); // Just to be sure there is no overflow, if the history size has changed in versions.
    reg->buffer[ reg->buffer_loop ].elapsed = time_passed;
    reg->buffer[ reg->buffer_loop ].time    = (uint32_t) time_now;
    reg->buffer_loop += 1;
-   reg->buffer_loop = (reg->buffer_loop % BUFFER_SIZE);
+   reg->buffer_loop = (reg->buffer_loop % HISTORY_SIZE);
    
    uint32_t storage_key = PERSISTANT_STORAGE_DATA_START + button ;
    
@@ -97,12 +100,13 @@ static void local_new_action( ButtonRegistryHistory* reg, time_t time_now, uint1
    {
       APP_LOG( APP_LOG_LEVEL_ERROR, "Writing registry %d failed: %d", (int)storage_key, ret);   
    }
-   
+//    APP_LOG( APP_LOG_LEVEL_INFO, "Added new action ind: %u", (unsigned int)reg->buffer_loop);
 }
 
 static void local_click_handler_single_action( ClickRecognizerRef recognizer, void *context) 
 {
   unsigned int button_index = (unsigned int) context;
+  
   ButtonRegistry* reg = &LOCAL_registry[button_index];
   time_t time_now = time( NULL );
 

@@ -1,14 +1,14 @@
 #include "main.h"
 
 
-#define TEXT_BUFFER_SIZE 32
+#define TEXT_HISTORY_SIZE 32
 #define N_LAYERS 3
 
 
 typedef struct
 {
    TextLayer* layer;
-   char       buffer[TEXT_BUFFER_SIZE];
+   char       buffer[TEXT_HISTORY_SIZE];
 } BufferedTextLayer;
 
 
@@ -50,7 +50,7 @@ static void local_create_layer( Layer* window_layer, GRect* window_bounds, unsig
   
   TextLayer* tlayer = text_layer_create(GRect(0, offset_h, window_bounds->size.w - ACTION_BAR_WIDTH, layer_size - layer_small));
   text_layer_set_font( tlayer , fonts_get_system_font(FONT_KEY_LECO_26_BOLD_NUMBERS_AM_PM));  
-  text_layer_set_text_alignment( tlayer, GTextAlignmentRight );
+  text_layer_set_text_alignment( tlayer, GTextAlignmentCenter );
   LOCAL_layers[ index ].layer = tlayer; 
   layer_add_child(window_layer, text_layer_get_layer(tlayer ));
   
@@ -95,7 +95,7 @@ void get_time_splitted( unsigned int* hour, unsigned int* min, unsigned* sec )
 #define CHECK_BUFFER_PRINT( fun ) \
 { \
    int __macro_ret = fun;\
-   if ( __macro_ret < 0 || __macro_ret >= TEXT_BUFFER_SIZE )\
+   if ( __macro_ret < 0 || __macro_ret >= TEXT_HISTORY_SIZE )\
    {\
       APP_LOG( APP_LOG_LEVEL_ERROR, "Too long print %s:%d -- %d", __FILE__, __LINE__, __macro_ret );\
    }\
@@ -108,7 +108,7 @@ void local_show_running_time( BufferedTextLayer* blayer, unsigned int sec  )
   unsigned int hour;
   get_time_splitted( &hour, &min, &sec ); 
   
-  CHECK_BUFFER_PRINT( snprintf( blayer->buffer, TEXT_BUFFER_SIZE, "%02u:%02u:%02u", hour, min, sec) );
+  CHECK_BUFFER_PRINT( snprintf( blayer->buffer, TEXT_HISTORY_SIZE, "%02u:%02u:%02u", hour, min, sec) );
   
   text_layer_set_text( blayer->layer, blayer->buffer );
   layer_mark_dirty(text_layer_get_layer(blayer->layer));
@@ -118,9 +118,9 @@ void local_show_running_time( BufferedTextLayer* blayer, unsigned int sec  )
 void local_show_datetime( BufferedTextLayer* blayer, const char* prefix, time_t time_was, const char* postfix )
 {
    struct tm* time_splitted = localtime(&time_was);
-   char tmp_buffer[TEXT_BUFFER_SIZE];
-   CHECK_BUFFER_PRINT( strftime( tmp_buffer, TEXT_BUFFER_SIZE, "%H:%M", time_splitted ) );
-   CHECK_BUFFER_PRINT( snprintf(blayer->buffer, TEXT_BUFFER_SIZE, "%s%s%s", prefix, tmp_buffer,postfix) );
+   char tmp_buffer[TEXT_HISTORY_SIZE];
+   CHECK_BUFFER_PRINT( strftime( tmp_buffer, TEXT_HISTORY_SIZE, "%H:%M", time_splitted ) );
+   CHECK_BUFFER_PRINT( snprintf(blayer->buffer, TEXT_HISTORY_SIZE, "%s%s%s", prefix, tmp_buffer,postfix) );
    
    text_layer_set_text( blayer->layer, blayer->buffer );
    layer_mark_dirty(text_layer_get_layer(blayer->layer));
@@ -184,15 +184,15 @@ void local_show_verbose_running_time( BufferedTextLayer* blayer, const char* pre
   
   if ( hour == 0 )
   {
-     CHECK_BUFFER_PRINT( snprintf( blayer->buffer, TEXT_BUFFER_SIZE, "%dmin ago", min ) );
+     CHECK_BUFFER_PRINT( snprintf( blayer->buffer, TEXT_HISTORY_SIZE, "%dmin ago", min ) );
   }
   else
   {
-     CHECK_BUFFER_PRINT( snprintf( blayer->buffer, TEXT_BUFFER_SIZE, "%dh %dmin ago", hour, min ) );
+     CHECK_BUFFER_PRINT( snprintf( blayer->buffer, TEXT_HISTORY_SIZE, "%dh %dmin ago", hour, min ) );
   }
-     
-   text_layer_set_text( blayer->layer, blayer->buffer );
-   layer_mark_dirty(text_layer_get_layer(blayer->layer));
+
+  text_layer_set_text( blayer->layer, blayer->buffer );
+  layer_mark_dirty(text_layer_get_layer(blayer->layer));
 }
 
 void main_window_update_elapsed( time_t time_now )
