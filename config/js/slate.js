@@ -50,6 +50,12 @@ var Zepto=function(){function L(t){return null==t?String(t):j[S.call(t)]||"objec
       });
     },
 
+
+
+
+
+
+
     itemDate: function() {
       this.each(function() {
         var $date = $(this);
@@ -100,6 +106,94 @@ var Zepto=function(){function L(t){return null==t?String(t):j[S.call(t)]||"objec
         $item.append($injectedRadio);
       });
     },
+
+
+
+
+
+
+
+
+
+itemIcon: function(){
+
+  
+var layout  = [
+["icon-000.png","icon-001.png","icon-002.png","icon-003.png","icon-004.png","icon-005.png","icon-006.png","icon-007.png",],
+["icon-008.png","icon-009.png","icon-010.png","icon-011.png","icon-012.png","icon-013.png","icon-014.png","icon-015.png",],
+["icon-016.png","icon-017.png","icon-018.png","icon-019.png","icon-020.png","icon-021.png","icon-022.png","icon-023.png",],
+["icon-024.png","icon-025.png","icon-026.png","icon-027.png","icon-028.png","icon-029.png","icon-030.png","icon-031.png",],
+["icon-032.png","icon-033.png","icon-034.png","icon-035.png","icon-036.png","icon-037.png","icon-038.png","icon-039.png",],
+["icon-040.png","icon-041.png","icon-042.png","icon-043.png","icon-044.png","icon-045.png","icon-046.png","icon-047.png",],
+["icon-048.png","icon-049.png","icon-050.png","icon-051.png","icon-052.png","icon-053.png","icon-054.png","icon-055.png",],
+];
+
+
+      this.each(function() {
+        var $color = $(this);
+        var $item = $color.parent();
+        var grid = '';
+        var itemWidth = 100 / layout[0].length;
+        var itemHeight = 100 / layout.length;
+        var boxHeight = itemWidth * layout.length;
+
+        for(var i = 0; i < layout.length; i++) {
+          for(var j = 0; j < layout[i].length; j++) {
+
+            var grid_loop = '<i ' +
+              'class="color-box selectable" ' +
+              'data-value="' + layout[i][j] + '" ' +
+                'style="' +
+                'width:' + itemWidth + '%; ' +
+                'height:' + itemHeight + '%; ' +
+                'background:black;">' + 
+              '<img src="images/' + layout[i][j] + '" ' + 
+                'style="' +
+                'width:100%; ' +
+                'height:100%; ' +
+                'background:black;">' + 
+             '</i>';
+            //console.log("LOOP" + grid_loop );
+            grid += grid_loop;    
+          }
+        }
+        //console.log("FULL GRID" + grid );
+        var $injectedColor = $('<div class="item-styled-color">' +
+          '<img class="main_imgshow" src="images/' + $color.val() + '" style="background:black;">' +
+          '<div ' +
+              'style="padding-bottom:' + boxHeight + '%"' +
+              'class="color-box-wrap">' +
+            '<div class="color-box-container">' +
+                grid +
+            '</div>' +
+          '</div>' +
+        '</div>');
+        $item.append($injectedColor);
+
+        var $valueDisplay = $injectedColor.find('.main_imgshow');
+
+        $color.on('click', function(ev) {
+          $item.find('.color-box-wrap').toggleClass('show');
+        });
+
+        $item.find('.color-box.selectable').on('click', function(ev) {
+          ev.preventDefault();
+
+          console.log("CLICKED ON" + $valueDisplay[0] );
+          var value = $(this);
+          console.log("CLICKED ON" + value );
+          $color.val(value);
+          $valueDisplay[0].src = "images/" + value ;
+          $item.find('.color-box-wrap').removeClass('show');
+        })
+
+      });
+    },
+
+
+
+
+
 
     itemColor: function(options){
 
@@ -337,6 +431,7 @@ var Zepto=function(){function L(t){return null==t?String(t):j[S.call(t)]||"objec
     $('.item-time').itemTime();
     $('.item-radio').itemRadio();
     $('.item-color-normal').itemColor({sunny: false});
+    $('.item-icon').itemIcon();
     $('.item-color-sunny').itemColor({sunny: true});
     $('.tab-button').tab();
     $('.item-slider').itemSlider();
