@@ -16,22 +16,22 @@
   "resources": {
     "media": [
       {
-        "file": "images/moonaction.png",
+        "file": "images/A10.png",
         "name": "ACTION_MOON",
         "type": "png"
       },
       {
-        "file": "images/diaperaction.png",
+        "file": "images/A11.png",
         "name": "ACTION_DIAPER",
         "type": "png"
       },
       {
-        "file": "images/bottleaction.png",
+        "file": "images/A13.png",
         "name": "ACTION_BOTTLE",
         "type": "png"
       },
       {
-        "file": "images/icon.png",
+        "file": "images/E2.png",
         "menuIcon": true,
         "name": "IMAGE_ICON",
         "type": "png"
