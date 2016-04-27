@@ -85,23 +85,28 @@ function getConfigData()
     {
        var prefix="button" + loop_button;
        console.log("DOING: " + prefix );
-       options[ prefix + "-icon" ] = document.getElementById( prefix + "-icon" ).value;
+       var value_icon = document.getElementById( prefix + "-icon" ).value;
        var tab = document.getElementById( prefix + "-radio" );
        var selected = tab.getElementsByClassName('item-radio');
-       var selected_value  = null;
+       var value_type  = "X";
        for ( var i = 0; i < selected.length; i ++ )
        {
          if ( selected[i].checked == true )
          {
-           selected_value = selected[i].value ;
+           value_type = selected[i].value ;
            break;
          }
        }
-       options[ prefix + "-type" ] = selected_value;
+       // save for next launch
+       localStorage['config-' + prefix ] = { 'icon' : value_icon, 'type' : value_type };
+       // set plain dict for easy url-passing
+       options[ prefix + "-icon" ] = value_icon;
+       options[ prefix + "-type" ] = value_type;
     }
     console.log("GOT:" + JSON.stringify(options) );
     return options;
 }
+
 
   function getQueryParam(variable, defaultValue) {
     var query = location.search.substring(1);
