@@ -119,13 +119,13 @@ itemIcon: function(){
 
   
 var layout  = [
-["icon-000.png","icon-001.png","icon-002.png","icon-003.png","icon-004.png","icon-005.png","icon-006.png","icon-007.png",],
-["icon-008.png","icon-009.png","icon-010.png","icon-011.png","icon-012.png","icon-013.png","icon-014.png","icon-015.png",],
-["icon-016.png","icon-017.png","icon-018.png","icon-019.png","icon-020.png","icon-021.png","icon-022.png","icon-023.png",],
-["icon-024.png","icon-025.png","icon-026.png","icon-027.png","icon-028.png","icon-029.png","icon-030.png","icon-031.png",],
-["icon-032.png","icon-033.png","icon-034.png","icon-035.png","icon-036.png","icon-037.png","icon-038.png","icon-039.png",],
-["icon-040.png","icon-041.png","icon-042.png","icon-043.png","icon-044.png","icon-045.png","icon-046.png","icon-047.png",],
-["icon-048.png","icon-049.png","icon-050.png","icon-051.png","icon-052.png","icon-053.png","icon-054.png","icon-055.png",],
+["icon_000.png","icon_001.png","icon_002.png","icon_003.png","icon_004.png","icon_005.png","icon_006.png","icon_007.png",],
+["icon_008.png","icon_009.png","icon_010.png","icon_011.png","icon_012.png","icon_013.png","icon_014.png","icon_015.png",],
+["icon_016.png","icon_017.png","icon_018.png","icon_019.png","icon_020.png","icon_021.png","icon_022.png","icon_023.png",],
+["icon_024.png","icon_025.png","icon_026.png","icon_027.png","icon_028.png","icon_029.png","icon_030.png","icon_031.png",],
+["icon_032.png","icon_033.png","icon_034.png","icon_035.png","icon_036.png","icon_037.png","icon_038.png","icon_039.png",],
+["icon_040.png","icon_041.png","icon_042.png","icon_043.png","icon_044.png","icon_045.png","icon_046.png","icon_047.png",],
+["icon_048.png","icon_049.png","icon_050.png","icon_051.png","icon_052.png","icon_053.png","icon_054.png","icon_055.png",],
 ];
 
 
