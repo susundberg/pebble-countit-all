@@ -98,7 +98,7 @@ function getConfigData()
          }
        }
        // save for next launch
-       localStorage['config-' + prefix ] = { 'icon' : value_icon, 'type' : value_type };
+       localStorage['config-' + prefix ] = JSON.stringify( { 'icon' : value_icon, 'type' : value_type } );
        // set plain dict for easy url-passing
        options[ prefix + "-icon" ] = value_icon;
        options[ prefix + "-type" ] = value_type;
@@ -133,6 +133,7 @@ function getConfigData()
   
     function apply_options( prefix, options )
     { // apply given options on given prefix
+       console.log("Appylying for " + prefix + ":" + JSON.stringify( options ) );
        document.getElementById( prefix + "-icon" ).value = options["icon"];
        var radio = document.getElementById( prefix + "-radio" );
        var radio_items = radio.getElementsByClassName('item-radio');
@@ -155,8 +156,9 @@ function getConfigData()
     {
        var prefix="button" + loop_button;
        console.log("LOAD: " + prefix );
-       if(localStorage['config-' + prefix + "-icon"]) 
+       if(localStorage['config-' + prefix]) 
        {
+          console.log("Options found for: " + prefix );
           var button_options = JSON.parse( localStorage['config-' + prefix] );
           apply_options( prefix, button_options  );
        }
