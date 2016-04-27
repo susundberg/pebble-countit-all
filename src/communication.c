@@ -4,8 +4,21 @@
 static void inbox_received_callback(DictionaryIterator* iter, void* context) 
 {
   APP_LOG(APP_LOG_LEVEL_INFO, "Message received!");
-  APP_LOG(APP_LOG_LEVEL_ERROR, "Unknown message received!");
-  
+
+  for (int loop_button = 0; loop_button < 3; loop_button ++ )
+  {
+     Tuple* tuple_icon = dict_find(iter, KEY_BUTTON1_ICON + loop_button );
+     if ( tuple_icon != NULL )
+     {
+        config_set_icon( click_get_button_id_from_index( loop_button ), tuple_icon->value->int32 );
+     }
+     
+     Tuple* tuple_type = dict_find(iter, KEY_BUTTON1_TYPE + loop_button);
+     if ( tuple_type != NULL )
+     {
+        config_set_flags( click_get_button_id_from_index( loop_button ), tuple_icon->value->int32 );
+     }
+  }
 }
 
 static void inbox_dropped_callback(AppMessageResult reason, void *context) 

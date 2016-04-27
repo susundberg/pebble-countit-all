@@ -19,8 +19,6 @@ static ActionBarLayer* LOCAL_action_bar ;
 static StatusBarLayer* LOCAL_status_bar;
 
 static GBitmap* LOCAL_icon[3];
-static const uint32_t RESOURCE_ICONS[] = { RESOURCE_ID_ACTION_BOTTLE, RESOURCE_ID_ACTION_DIAPER, RESOURCE_ID_ACTION_MOON };
-
 
 static void local_set_layer_color_inverted( unsigned int index, bool inverted )
 {
@@ -143,7 +141,7 @@ void main_window_load(Window *window)
      
      if ( click_registry_enabled( loop ) == true ) 
      {
-        LOCAL_icon[loop] = gbitmap_create_with_resource( RESOURCE_ICONS[ loop ] );
+        LOCAL_icon[loop] = gbitmap_create_with_resource( click_get_button_id_from_index( loop )  );
         action_bar_layer_set_icon( LOCAL_action_bar, click_get_button_id_from_index( loop ), LOCAL_icon[loop] );  
      }
   }

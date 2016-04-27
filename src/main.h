@@ -5,14 +5,24 @@
 
 #define FLAG_SINGLE_ACTION_BUTTON   0x01
 #define FLAG_LONG_ACTION_BUTTON     0x02
-
+#define FLAG_MASK_VALID             0x03
 
 #define BUTTON_N_INDEX 3
 #define HISTORY_SIZE   32
 
 
-#define PERSISTANT_STORAGE_DATA_START  1000
+#define PERSISTANT_STORAGE_DATA_START   1000
+#define PERSISTANT_STORAGE_CONFIG_START 100
 
+
+#define KEY_BUTTON1_ICON 100
+// #define KEY_BUTTON2_ICON 101
+// #define KEY_BUTTON3_ICON 102
+
+#define KEY_BUTTON1_TYPE 200
+// #define KEY_BUTTON2_TYPE 201
+// #define KEY_BUTTON3_TYPE 202
+    
 void main_show_menu_window(unsigned int index);
 
 
@@ -64,9 +74,12 @@ void menu_window_set_data( unsigned int index );
 /** Functions implemented in config.c */
 /// @return is the action enabled
 uint8_t config_get( ButtonId button_id );
-/// Write config to storage
-void config_set( ButtonId button_id, uint8_t flags );
+/** @return resource id for the icon for the given button */
+uint32_t config_get_icon( ButtonId button_id );
 
+/// Write config to storage
+void config_set_flags( ButtonId button_id, uint8_t flags );
+void config_set_icon ( ButtonId button_id, uint32_t icon_id ); 
 
 /** Functions implemented in communication.c */
 

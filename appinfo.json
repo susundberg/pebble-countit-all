@@ -11,8 +11,17 @@
     "watchface": false
   },
   "appKeys": {
-    "dummy": 0
-  },
+    "KEY_BUTTON1_ICON": 100,
+    "KEY_BUTTON2_ICON": 101,
+    "KEY_BUTTON3_ICON": 102,
+    "KEY_BUTTON1_TYPE": 200,
+    "KEY_BUTTON2_TYPE": 201,
+    "KEY_BUTTON3_TYPE": 202,
+    "KEY_BUTTON1_DATA": 500,
+    "KEY_BUTTON2_DATA": 501,
+    "KEY_BUTTON3_DATA": 502 
+    },
+    
   "resources": {
    "media": [
    {

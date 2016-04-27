@@ -17,8 +17,8 @@ Pebble.addEventListener('webviewclosed', function(e) {
   {
      var prefix="button" + loop_button;
      
-     var key_icon = (prefix+"_icon").toUpperCase();
-     var key_type = (prefix+"_type").toUpperCase();
+     var key_icon = ("key_" + prefix+"_icon").toUpperCase();
+     var key_type = ("key_" + prefix+"_type").toUpperCase();
      dict[key_icon] = config[ prefix + "-icon" ].toUpperCase();
      dict[key_type] = config[ prefix + "-type" ].toUpperCase();
   }
