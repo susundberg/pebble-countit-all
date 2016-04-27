@@ -14,28 +14,296 @@
     "dummy": 0
   },
   "resources": {
-    "media": [
-      {
-        "file": "images/A10.png",
-        "name": "ACTION_MOON",
-        "type": "png"
-      },
-      {
-        "file": "images/A11.png",
-        "name": "ACTION_DIAPER",
-        "type": "png"
-      },
-      {
-        "file": "images/A13.png",
-        "name": "ACTION_BOTTLE",
-        "type": "png"
-      },
-      {
-        "file": "images/E2.png",
-        "menuIcon": true,
-        "name": "IMAGE_ICON",
-        "type": "png"
-      }
-    ]
+   "media": [
+   {
+      "file" : "images/icon-000.png",
+      "name" : "icon-000.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-001.png",
+      "name" : "icon-001.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-002.png",
+      "name" : "icon-002.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-003.png",
+      "name" : "icon-003.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-004.png",
+      "name" : "icon-004.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-005.png",
+      "name" : "icon-005.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-006.png",
+      "name" : "icon-006.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-007.png",
+      "name" : "icon-007.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-008.png",
+      "name" : "icon-008.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-009.png",
+      "name" : "icon-009.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-010.png",
+      "name" : "icon-010.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-011.png",
+      "name" : "icon-011.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-012.png",
+      "name" : "icon-012.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-013.png",
+      "name" : "icon-013.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-014.png",
+      "name" : "icon-014.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-015.png",
+      "name" : "icon-015.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-016.png",
+      "name" : "icon-016.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-017.png",
+      "name" : "icon-017.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-018.png",
+      "name" : "icon-018.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-019.png",
+      "name" : "icon-019.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-020.png",
+      "name" : "icon-020.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-021.png",
+      "name" : "icon-021.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-022.png",
+      "name" : "icon-022.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-023.png",
+      "name" : "icon-023.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-024.png",
+      "name" : "icon-024.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-025.png",
+      "name" : "icon-025.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-026.png",
+      "name" : "icon-026.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-027.png",
+      "name" : "icon-027.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-028.png",
+      "name" : "icon-028.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-029.png",
+      "name" : "icon-029.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-030.png",
+      "name" : "icon-030.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-031.png",
+      "name" : "icon-031.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-032.png",
+      "name" : "icon-032.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-033.png",
+      "name" : "icon-033.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-034.png",
+      "name" : "icon-034.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-035.png",
+      "name" : "icon-035.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-036.png",
+      "name" : "icon-036.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-037.png",
+      "name" : "icon-037.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-038.png",
+      "name" : "icon-038.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-039.png",
+      "name" : "icon-039.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-040.png",
+      "name" : "icon-040.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-041.png",
+      "name" : "icon-041.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-042.png",
+      "name" : "icon-042.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-043.png",
+      "name" : "icon-043.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-044.png",
+      "name" : "icon-044.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-045.png",
+      "name" : "icon-045.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-046.png",
+      "name" : "icon-046.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-047.png",
+      "name" : "icon-047.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-048.png",
+      "name" : "icon-048.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-049.png",
+      "name" : "icon-049.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-050.png",
+      "name" : "icon-050.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-051.png",
+      "name" : "icon-051.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-052.png",
+      "name" : "icon-052.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-053.png",
+      "name" : "icon-053.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-054.png",
+      "name" : "icon-054.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-055.png",
+      "name" : "icon-055.png",
+      "type" : "png"
+   },
+   {
+      "file" : "images/icon-056.png",
+      "name" : "icon-056.png",
+      "type" : "png"
+   }
+   ]
   }
 }
+
+
+
+
