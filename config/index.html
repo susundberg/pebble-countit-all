@@ -76,7 +76,6 @@
 
 <script>
 
-(function($, Sortable) {
 
 function getConfigData() 
 {
@@ -88,14 +87,12 @@ function getConfigData()
        console.log("DOING: " + prefix );
        options[ prefix + "-icon" ] = document.getElementById( prefix + "-icon" ).value;
        var tab = document.getElementById( prefix + "-radio" );
-       console.log("FINDING " + tab );
        var selected = tab.getElementsByClassName('item-radio');
-       var selected_value;
+       var selected_value  = null;
        for ( var i = 0; i < selected.length; i ++ )
        {
          if ( selected[i].checked == true )
          {
-           console.log("FINDING " + selected[i].value );  
            selected_value = selected[i].value ;
            break;
          }
@@ -104,7 +101,7 @@ function getConfigData()
     }
     console.log("GOT:" + JSON.stringify(options) );
     return options;
-  }
+}
 
   function getQueryParam(variable, defaultValue) {
     var query = location.search.substring(1);
@@ -126,17 +123,40 @@ function getConfigData()
     document.location = return_to + encodeURIComponent(JSON.stringify(getConfigData()));
   });
 
-  (function() {
-    var backgroundColorPicker = document.getElementById('background_color_picker');
-    var highContrastCheckbox = document.getElementById('high_contrast_checkbox');
-
+  (function() 
+  {
+  
+    function apply_options( prefix, options )
+    { // apply given options on given prefix
+       document.getElementById( prefix + "-icon" ).value = options["icon"];
+       var radio = document.getElementById( prefix + "-radio" );
+       var radio_items = radio.getElementsByClassName('item-radio');
+       var selected_value  = null;
+       for ( var i = 0; i < radio_items.length; i ++ )
+       {
+          if ( radio_items[i].value == options["type"] )
+          {
+             radio_items[i].checked = true;
+          }
+          else
+          {
+             radio_items[i].checked = false;
+          }
+       }
+    }
+    
     // Load any previously saved configuration, if available
-    if(localStorage['high_contrast']) {
-      highContrastCheckbox.checked = JSON.parse(localStorage['high_contrast']);
-      backgroundColorPicker.value = localStorage['background_color'];
+    for ( var loop_button = 1; loop_button < 3; loop_button ++ )
+    {
+       var prefix="button" + loop_button;
+       console.log("LOAD: " + prefix );
+       if(localStorage['config-' + prefix + "-icon"]) 
+       {
+          var button_options = JSON.parse( localStorage['config-' + prefix] );
+          apply_options( prefix, button_options  );
+       }
     }
   })();
 
-}(Zepto, Sortable));  
-  </script>
+</script>
 </html>

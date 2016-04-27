@@ -160,7 +160,6 @@ var layout  = [
         
         var $injectedColor = $('<div class="item-styled-color">' +
           '<img class="value" src="images/' + $color.val() + '" style="background:black;width:32px;height:32px;"></img>' +
-//           '<img class="main_imgshow" src="images/' + $color.val() + '" style="background:black;">' +
           '<div ' +
               'style="padding-bottom:' + boxHeight + '%"' +
               'class="color-box-wrap">' +
@@ -181,11 +180,8 @@ var layout  = [
           ev.preventDefault();
 
           var value = $(this).data('value');
-          console.log("CLICKED ON : " + value + "," + $valueDisplay );
           $color.val(value);
           $valueDisplay.src = "images/" + value;
-          
-//           $valueDisplay.css('background-color', value.replace(/^0x/, '#'));
           $item.find('.color-box-wrap').removeClass('show');
         })
 
