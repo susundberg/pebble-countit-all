@@ -1,7 +1,6 @@
 
 
 #include <pebble.h>
-#include <assert.h>
 #include "main.h"
 
 
@@ -15,7 +14,6 @@ typedef struct
 
 typedef struct
 {
-  time_t   time_started;
   ButtonRegistryHistory history;
   ButtonId button_id;
   uint8_t  flags; 
@@ -85,22 +83,33 @@ const ButtonRegistryBuffer* local_get_last_action( const ButtonRegistry* reg )
 }
 
 
-static void local_new_action( ButtonRegistryHistory* reg, time_t time_now, uint16_t time_passed, ButtonId button )
+static void local_new_action( ButtonRegistryHistory* reg, time_t time_now, uint32_t time_passed, ButtonId button, uint32_t flags )
 {
+   if ((time_passed & BUFFER_FLAG_MASK) != 0x00)
+   {
+      time_passed  = (~BUFFER_FLAG_MASK);
+   }
+   
+   flags = flags | BUFFER_FLAG_NOT_SENT;
+   
    reg->buffer_loop = (reg->buffer_loop % HISTORY_SIZE); // Just to be sure there is no overflow, if the history size has changed in versions.
-   reg->buffer[ reg->buffer_loop ].elapsed = time_passed;
+   reg->buffer[ reg->buffer_loop ].flags_n_elapsed = flags | time_passed;
    reg->buffer[ reg->buffer_loop ].time    = (uint32_t) time_now;
-   reg->buffer_loop += 1;
-   reg->buffer_loop = (reg->buffer_loop % HISTORY_SIZE);
+   
+   if (( flags & BUFFER_FLAG_RUNNING ) == 0x00)
+   {
+      reg->buffer_loop += 1;
+      reg->buffer_loop = (reg->buffer_loop % HISTORY_SIZE);
+   }
    
    uint32_t storage_key = PERSISTANT_STORAGE_DATA_START + button ;
    
    int ret = persist_write_data( storage_key, reg, sizeof(ButtonRegistryHistory) );
    if ( ret != sizeof(ButtonRegistryHistory))
    {
-      APP_LOG( APP_LOG_LEVEL_ERROR, "Writing registry %d failed: %d", (int)storage_key, ret);   
+      APP_LOG( APP_LOG_LEVEL_ERROR, "Writing registry %d failed: %d vs %d", (int)storage_key, ret, sizeof(ButtonRegistryHistory) );   
    }
-//    APP_LOG( APP_LOG_LEVEL_INFO, "Added new action ind: %u", (unsigned int)reg->buffer_loop);
+
 }
 
 static void local_click_handler_single_action( ClickRecognizerRef recognizer, void *context) 
@@ -110,7 +119,7 @@ static void local_click_handler_single_action( ClickRecognizerRef recognizer, vo
   ButtonRegistry* reg = &LOCAL_registry[button_index];
   time_t time_now = time( NULL );
 
-  local_new_action( &reg->history, time_now, 0xFFFF, reg->button_id );
+  local_new_action( &reg->history, time_now, 0x00, reg->button_id, 0x00 );
   main_window_update_elapsed( time_now );
 }
 
@@ -121,33 +130,41 @@ static void local_click_open_menu(ClickRecognizerRef recognizer, void *context)
    main_show_menu_window( button_index );
 }
 
+static bool local_duration_measurement_ongoing( const ButtonRegistry* reg, uint32_t* time_started )
+{
+  const ButtonRegistryHistory* hist = &reg->history;
+  uint32_t current_index = hist->buffer_loop % HISTORY_SIZE;
+  
+  bool ret = ( ( hist->buffer[ current_index ].flags_n_elapsed & BUFFER_FLAG_RUNNING ) != 0x00 );
+  
+  if (ret == false)
+     return false;
+  
+  (*time_started) = hist->buffer[current_index].time;
+  return true;
+}
 
 static void local_click_handler_long_action( ClickRecognizerRef recognizer, void *context) 
 {
   unsigned int button_index = (unsigned int) context;
   ButtonRegistry* reg = &LOCAL_registry[button_index];
   time_t time_now = time( NULL );
+  uint32_t time_started;
   
-  if ( reg->time_started == 0 )
+  if ( local_duration_measurement_ongoing( reg, &time_started ) == false )
   {
-     reg->time_started = time_now;
+     // No measurement ongoing, start new
+     APP_LOG( APP_LOG_LEVEL_DEBUG, "Starte measurement on button %d %d", button_index, (int)time_now );
+     local_new_action( &reg->history, time_now, 0x00, reg->button_id, BUFFER_FLAG_RUNNING  );
+     main_window_update_elapsed( time_now );
      return;
   }
   
-  
-  time_t time_started = reg->time_started;
-  reg->time_started = 0;
-  
+  APP_LOG( APP_LOG_LEVEL_DEBUG, "Done measurement on button %d %d", button_index, (int)time_started );
+  // This is finalization of the measurement
   uint32_t elapsed_long = time_now - time_started;
-  uint16_t elapsed = 0;
+  local_new_action( &reg->history, time_now, elapsed_long, reg->button_id, 0x00 );
   
-  if ( elapsed_long > 0xFFFF )
-     elapsed = 0xFFFF;
-  else
-     elapsed = (uint16_t)elapsed_long ;
-  
-  
-  local_new_action( &reg->history, time_now, elapsed, reg->button_id );
   main_window_update_elapsed( time_now );
 }
 
@@ -162,12 +179,12 @@ static void local_click_config_provider_wrapper(  ButtonId button_id, void* cont
   APP_LOG( APP_LOG_LEVEL_DEBUG, "Register button %d %d", button_index, flags );
   
   bool enabled = false;
-  if ( flags & FLAG_SINGLE_ACTION_BUTTON )
+  if ( flags & BUTTONTYPE_FLAG_SINGLE )
   {
      window_single_click_subscribe( button_id, local_click_handler_single_action ); // single click
      enabled = true;
   }
-  if ( flags & FLAG_LONG_ACTION_BUTTON )
+  if ( flags & BUTTONTYPE_FLAG_DURATION )
   {
      window_single_click_subscribe( button_id, local_click_handler_long_action ); // single click
      enabled = true;
@@ -218,7 +235,6 @@ void local_load_buffer_from_storage( ButtonRegistryHistory* reg, uint32_t key_of
 void click_registry_init()
 {
    memset( LOCAL_registry, 0x00, sizeof(LOCAL_registry));
-   assert( sizeof(ButtonRegistryBuffer) == 6 ); // make sure no padding
    
    for (int loop = 0; loop < BUTTON_N_INDEX; loop ++ )
    {
@@ -235,10 +251,10 @@ bool click_registry_enabled( unsigned int index )
 {
    ButtonRegistry* reg = &LOCAL_registry[index];  
 
-   if ( ( reg->flags & FLAG_LONG_ACTION_BUTTON ) != 0x00 )
+   if ( ( reg->flags & BUTTONTYPE_FLAG_DURATION ) != 0x00 )
       return true;
    
-   if ( ( reg->flags & FLAG_SINGLE_ACTION_BUTTON ) != 0x00 )
+   if ( ( reg->flags & BUTTONTYPE_FLAG_SINGLE ) != 0x00 )
       return true;
    
    return false;
@@ -248,13 +264,14 @@ bool click_registry_get_elapsed( time_t time_now, unsigned int index, unsigned i
 {
    ButtonRegistry* reg = &LOCAL_registry[index];  
 
-   if ( ( reg->flags & FLAG_LONG_ACTION_BUTTON ) == 0x00 )
+   if ( ( reg->flags & BUTTONTYPE_FLAG_DURATION ) == 0x00 )
       return false;
    
-   if ( reg->time_started > 0 )
+   uint32_t started_at;
+   if ( local_duration_measurement_ongoing( reg, &started_at) == true )
    {
-      (*elapsed)     = (unsigned int)time_now - (unsigned int)reg->time_started;
-      (*action_time) = (unsigned int)reg->time_started;
+      (*elapsed)     = (unsigned int)time_now - (unsigned int)started_at;
+      (*action_time) = (unsigned int)started_at;
       return true;
    }
    return false; 

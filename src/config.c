@@ -12,6 +12,13 @@ uint32_t local_get_key( ButtonId button_id )
 uint8_t config_get( ButtonId button_id )
 {
    uint32_t per_key = local_get_key(button_id);
+   
+   if ( persist_exists(per_key) == false && button_id == BUTTON_ID_UP )
+   {
+      // default to non disabled button to avoid empty screen
+      return BUTTONTYPE_FLAG_SINGLE;
+   };
+   
    int32_t ret = persist_read_int( per_key );
    APP_LOG( APP_LOG_LEVEL_INFO, "Got flags %d : %d", (int)button_id, (int)ret ); 
    return (uint8_t)ret;
@@ -20,8 +27,10 @@ uint8_t config_get( ButtonId button_id )
 void config_set_flags(ButtonId button_id, uint8_t flags )
 {
    uint32_t per_key = local_get_key(button_id);
+
+   
    APP_LOG( APP_LOG_LEVEL_INFO, "Storing flags %d : %d", (int)button_id, (int)flags ); 
-   if ( flags & ~FLAG_MASK_VALID )
+   if ( flags & ~BUTTONTYPE_FLAG_MASK )
       return;   
    persist_write_int( per_key, flags );
 }

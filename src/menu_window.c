@@ -70,12 +70,12 @@ void local_load_data( )
          nvalids += 1;
          LOCAL_menu_items[loop].callback = local_menu_callback;
          
-         if ( flags & FLAG_LONG_ACTION_BUTTON ) 
+         if ( flags & BUTTONTYPE_FLAG_DURATION ) 
          {
             char* subtitle = LOCAL_menu_texts_small + MENU_ENTRY_SIZE*loop;
             unsigned int hours;
             unsigned int minutes;
-            unsigned int seconds = buffer->elapsed;
+            unsigned int seconds = BUFFER_HISTORY_ELAPSED( buffer->flags_n_elapsed );
             get_time_splitted( &hours, &minutes, &seconds);
             snprintf( subtitle, MENU_ENTRY_SIZE, "D: %02d:%02d:%02d", hours, minutes, seconds );
             LOCAL_menu_items[loop].subtitle = subtitle;

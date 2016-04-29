@@ -3,12 +3,19 @@
 
 #include <pebble.h>
 
-#define FLAG_SINGLE_ACTION_BUTTON   0x01
-#define FLAG_LONG_ACTION_BUTTON     0x02
-#define FLAG_MASK_VALID             0x03
+#define BUTTONTYPE_FLAG_SINGLE     0x01
+#define BUTTONTYPE_FLAG_DURATION   0x02
+#define BUTTONTYPE_FLAG_MASK       0x03
+
+
+#define BUFFER_FLAG_MASK        0xF0000000 
+#define BUFFER_FLAG_NOT_SENT    0x10000000  // This value has not been sent to phone
+#define BUFFER_FLAG_RUNNING     0x20000000  // This entry is duration that has been started but not ended
+
+#define BUFFER_HISTORY_ELAPSED(x) ((x)&(~BUFFER_FLAG_MASK))
 
 #define BUTTON_N_INDEX 3
-#define HISTORY_SIZE   32
+#define HISTORY_SIZE   30
 
 
 #define PERSISTANT_STORAGE_DATA_START   1000
@@ -16,22 +23,22 @@
 
 
 #define KEY_BUTTON1_ICON 100
-// #define KEY_BUTTON2_ICON 101
-// #define KEY_BUTTON3_ICON 102
+// #define KEY_BUTTON2_ICON 101 (done dynamically with loop)
+// #define KEY_BUTTON3_ICON 102 (done dynamically with loop)
 
 #define KEY_BUTTON1_TYPE 200
-// #define KEY_BUTTON2_TYPE 201
-// #define KEY_BUTTON3_TYPE 202
+// #define KEY_BUTTON2_TYPE 201 (done dynamically with loop)
+// #define KEY_BUTTON3_TYPE 202 (done dynamically with loop)
     
 void main_show_menu_window(unsigned int index);
 void main_reload_config();
 
 
 /** Functions implemented in clicks.c */
-typedef struct __attribute__ ((__packed__))
+typedef struct 
 {
    uint32_t time;
-   uint16_t elapsed;
+   uint32_t flags_n_elapsed; // BUFFER_FLAG_MASK flags and rest are duration
 } ButtonRegistryBuffer;
 
 /// Config click provider for the window

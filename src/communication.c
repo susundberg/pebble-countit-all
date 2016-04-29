@@ -25,10 +25,10 @@ static bool local_handle_type(DictionaryIterator* iter, int loop )
         switch ( tuple_type->value->cstring[0] ) 
         {
            case 'D':
-              flag = FLAG_LONG_ACTION_BUTTON;
+              flag = BUTTONTYPE_FLAG_DURATION;
               break;
            case 'S':
-              flag = FLAG_SINGLE_ACTION_BUTTON;
+              flag = BUTTONTYPE_FLAG_SINGLE;
               break;
            default:
               flag = 0x00;
