@@ -162,6 +162,10 @@ function getConfigData()
           var button_options = JSON.parse( localStorage['config-' + prefix] );
           apply_options( prefix, button_options  );
        }
+       else
+       {
+          console.log("No previous options found for: " + prefix );
+       }
     }
   })();
 

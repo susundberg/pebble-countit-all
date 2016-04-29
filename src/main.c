@@ -19,8 +19,16 @@ static void local_time_event_handler(struct tm *tick_time, TimeUnits units_chang
 }
 
 
+void main_reload_config()
+{
+   APP_LOG(APP_LOG_LEVEL_DEBUG, "Reloading config .. ");
+   click_registry_init();
+   main_window_reload_config();
+}
+
 static void local_init() 
 {
+  APP_LOG( APP_LOG_LEVEL_INFO, "Initializing .. " );
   click_registry_init();
   communication_init();
   
@@ -54,6 +62,7 @@ static void local_deinit()
 
 int main(void) 
 {
+  APP_LOG( APP_LOG_LEVEL_INFO, "Initializing .. " );
   local_init();
   APP_LOG( APP_LOG_LEVEL_INFO, "Entering main loop" );
   app_event_loop();

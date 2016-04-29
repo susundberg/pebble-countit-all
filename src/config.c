@@ -42,6 +42,9 @@ uint32_t config_get_icon( ButtonId button_id )
    uint32_t per_key = local_get_key(button_id) + 1;
    int32_t ret = persist_read_int( per_key );
    APP_LOG( APP_LOG_LEVEL_INFO, "Load icon %d -> %d", (int)button_id, (int)ret ); 
+   if ( ret < 0 || ret >= (int)(sizeof(LOCAL_icon_resources)/sizeof(uint32_t)) )
+      ret = 0;
+   
    return LOCAL_icon_resources[ (int)ret ];
 }
 

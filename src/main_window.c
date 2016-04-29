@@ -18,7 +18,7 @@ static BufferedTextLayer LOCAL_layers_small[N_LAYERS];
 static ActionBarLayer* LOCAL_action_bar ;
 static StatusBarLayer* LOCAL_status_bar;
 
-static GBitmap* LOCAL_icon[3];
+static GBitmap* LOCAL_icon[3] = { NULL, NULL, NULL };
 
 static void local_set_layer_color_inverted( unsigned int index, bool inverted )
 {
@@ -124,7 +124,25 @@ void local_show_datetime( BufferedTextLayer* blayer, const char* prefix, time_t 
    layer_mark_dirty(text_layer_get_layer(blayer->layer));
 }
 
-                          
+
+void main_window_reload_config()
+{
+  for ( int loop = 0; loop < N_LAYERS; loop ++ )
+  {
+    if ( LOCAL_icon[loop] != NULL )
+    {
+      gbitmap_destroy( LOCAL_icon[loop] );  
+      LOCAL_icon[loop] = NULL;
+    }   
+    
+    if ( click_registry_enabled( loop ) == true ) 
+    {
+       LOCAL_icon[loop] = gbitmap_create_with_resource( config_get_icon( click_get_button_id_from_index( loop ) ) );
+       action_bar_layer_set_icon( LOCAL_action_bar, click_get_button_id_from_index( loop ), LOCAL_icon[loop] );  
+    }
+  }
+  action_bar_layer_set_click_config_provider(LOCAL_action_bar,click_config_provider);
+}
 
 void main_window_load(Window *window) 
 {
@@ -134,20 +152,14 @@ void main_window_load(Window *window)
   
   LOCAL_action_bar = action_bar_layer_create();
   
-  action_bar_layer_set_click_config_provider(LOCAL_action_bar,click_config_provider);
+  
   for ( int loop = 0; loop < N_LAYERS; loop ++ )
   {
      local_create_layer( window_layer, &window_bounds, loop );
-     
-     if ( click_registry_enabled( loop ) == true ) 
-     {
-        LOCAL_icon[loop] = gbitmap_create_with_resource( click_get_button_id_from_index( loop )  );
-        action_bar_layer_set_icon( LOCAL_action_bar, click_get_button_id_from_index( loop ), LOCAL_icon[loop] );  
-     }
   }
   action_bar_layer_add_to_window(LOCAL_action_bar, window);
 
-  // then add status baar  
+  // then add status bar  
   LOCAL_status_bar = status_bar_layer_create();
   int16_t width = layer_get_bounds(window_layer).size.w - ACTION_BAR_WIDTH;
   GRect frame = GRect(0, 0, width, STATUS_BAR_LAYER_HEIGHT);
@@ -155,8 +167,8 @@ void main_window_load(Window *window)
   layer_add_child(window_layer, status_bar_layer_get_layer(LOCAL_status_bar));  
    
   // Update all
-  
-   main_window_update_elapsed( time(NULL) );  
+  main_window_reload_config();
+  main_window_update_elapsed( time(NULL) );  
 }
 
 void main_window_unload(Window *window) 
@@ -166,7 +178,14 @@ void main_window_unload(Window *window)
   {
      text_layer_destroy(LOCAL_layers[loop].layer);
      text_layer_destroy(LOCAL_layers_small[loop].layer);
+     
+     if ( LOCAL_icon[loop] != NULL )
+     {
+        gbitmap_destroy( LOCAL_icon[loop] );  
+        LOCAL_icon[loop] = NULL;
+     }   
   }
+  
   action_bar_layer_destroy( LOCAL_action_bar );
   status_bar_layer_destroy( LOCAL_status_bar );
 }

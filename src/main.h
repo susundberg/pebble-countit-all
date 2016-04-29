@@ -24,7 +24,7 @@
 // #define KEY_BUTTON3_TYPE 202
     
 void main_show_menu_window(unsigned int index);
-
+void main_reload_config();
 
 
 /** Functions implemented in clicks.c */
@@ -70,6 +70,7 @@ void main_window_load(Window *window) ;
 void menu_window_unload( Window *window );
 void menu_window_load( Window *window );
 void menu_window_set_data( unsigned int index );
+void main_window_reload_config();
 
 /** Functions implemented in config.c */
 /// @return is the action enabled
