@@ -10,6 +10,9 @@
   "watchapp": {
     "watchface": false
   },
+  "capabilities": [
+    "configurable"
+  ],
   "appKeys": {
     "KEY_BUTTON1_ICON": 100,
     "KEY_BUTTON2_ICON": 101,
