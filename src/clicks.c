@@ -32,6 +32,12 @@ const ButtonRegistryBuffer* click_registry_get_action( unsigned int index, unsig
    
    if (reg->history.buffer[ current_index ].time == 0 )
       return NULL;
+   
+   if ( reg->flags & BUTTONTYPE_FLAG_DURATION )
+   {
+      if ( reg->history.buffer[current_index].flags_n_elapsed & BUFFER_FLAG_RUNNING )
+         return NULL;
+   } 
    return &reg->history.buffer[ current_index ];
 }
 
@@ -42,7 +48,7 @@ void click_registry_clear( unsigned int index, unsigned int loop )
    unsigned int buffer_index = (2*HISTORY_SIZE + (reg->history.buffer_loop - 1) - loop)%HISTORY_SIZE;
    
    memset( &reg->history.buffer[buffer_index], 0x00, sizeof( ButtonRegistryBuffer ) );
-//    APP_LOG( APP_LOG_LEVEL_INFO, "Clearing entry %d (ind: %d)", (int)loop, (int)buffer_index );   
+   APP_LOG( APP_LOG_LEVEL_INFO, "Clearing entry %d (ind: %d)", (int)loop, (int)buffer_index );   
 }
 
 void click_registry_clear_finish( unsigned int index)
@@ -62,6 +68,7 @@ void click_registry_clear_finish( unsigned int index)
       if ( reg->history.buffer[ current_index ].time == 0 )
          continue;
       
+      APP_LOG( APP_LOG_LEVEL_INFO, "Valid index %d", (int)current_index);   
       new_history.buffer[ new_history.buffer_loop ] = reg->history.buffer[ current_index ];
       new_history.buffer_loop = (new_history.buffer_loop + 1) % HISTORY_SIZE ;
    }
@@ -186,7 +193,7 @@ static void local_click_config_provider_wrapper(  ButtonId button_id, void* cont
   }
   if ( flags & BUTTONTYPE_FLAG_DURATION )
   {
-     window_single_click_subscribe( button_id, local_click_handler_long_action ); // single click
+     window_single_click_subscribe( button_id, local_click_handler_long_action ); // long action
      enabled = true;
   }
   if ( enabled )
