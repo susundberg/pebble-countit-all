@@ -61,6 +61,14 @@ void click_registry_clear( unsigned int index, unsigned int loop );
 /** Finish it */
 void click_registry_clear_finish( unsigned int index );
 
+/** @returns true if there are some values to be sent */
+bool click_registry_send_has_any();
+
+/** Write all unsent data (or at most given size) */
+void click_registry_send_write(DictionaryIterator* dict );
+/** Clear the beeing sent flag to either sent_ok or not_sent status based on @param sent_ok */
+void click_registry_send_clear( bool sent_ok );
+
 /** @returns the @param loop 'th action from the @param index buffer or NULL if the action has not been taken */
 const ButtonRegistryBuffer* click_registry_get_action( unsigned int index, unsigned int loop );
 

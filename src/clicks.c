@@ -16,12 +16,90 @@ typedef struct
 {
   ButtonRegistryHistory history;
   ButtonId button_id;
+  uint32_t to_send_n;
   uint8_t  flags; 
 } ButtonRegistry;
 
 ButtonRegistry LOCAL_registry[ BUTTON_N_INDEX ];
 
+bool click_registry_send_has_any()
+{
+   for (int loop = 0; loop < BUTTON_N_INDEX; loop ++ )
+   {
+      if ( LOCAL_registry[ loop ].to_send_n > 0 )
+         return true;
+   }
+   return false;
+}
+
+
+#define MAX_ITEMS_TO_SEND ( APP_MESSAGE_OUTBOX_SIZE_MINIMUM/sizeof(ButtonRegistryBuffer))
+
+#define OUTBOX_SIZE  // estimate: 1 + 2 * 7 + 1 + (8 * HISTORY_SIZE) 
+
+static uint8_t LOCAL_send_buffer[(8 * HISTORY_SIZE)]; // each item takes
+
+#define DICT_WRITE_CHECK(fun){\
+  DictionaryResult __macro_res = fun;\
+  if ( __macro_res != DICT_OK )\
+  {\
+    APP_LOG( APP_LOG_LEVEL_ERROR, "Dict write failed %s:%d (%d)", __FILE__,__LINE__, (int)__macro_res ); \
+    return; \
+  }}
+  
+int click_registry_send_write(DictionaryIterator* dict )
+{
+   unsigned int send_buffer_offset = 0;
    
+   for (int index = 0; index < BUTTON_N_INDEX; index ++ )
+   {
+      ButtonRegistry* reg = &LOCAL_registry[index];
+      
+      if ( reg->to_send_n == 0 )
+         continue;
+      
+      DICT_WRITE_CHECK( dict_write_uint8( dict, COMMUNICATION_KEY_BUTTON_INDEX, (uint8_t)index ) );
+      
+      unsigned int last_index = reg->history.buffer_loop;
+      
+      for ( unsigned int loop = 0; loop < HISTORY_SIZE; loop ++ )
+      {
+         unsigned int current_index = (last_index + loop) % HISTORY_SIZE ;
+         
+         ButtonRegistryBuffer* buffer = reg->history.buffer;
+         if (( buffer[current_index].flags_n_elapsed & BUFFER_FLAG_NOT_SENT) == 0x00 )
+            continue;
+      
+        // clear not sent flag
+        buffer[current_index].flags_n_elapsed &= ~BUFFER_FLAG_NOT_SENT;
+
+        // and raise sending flag
+        buffer[current_index].flags_n_elapsed |= BUFFER_FLAG_SENDING;
+        
+        APP_LOG( APP_LOG_LEVEL_INFO, "Sending button %d index %d", (int)index, (int)current_index );   
+        
+        // Todo: here we send almost double the amount we would need when button type is 
+        // is single action button. I guess it doesnt matter -- the amount are small anyway.
+        
+        uint32_t to_send = BUFFER_FLAG_MASK | buffer[current_index].flags_n_elapsed;
+        
+        local_encode_uint32( &send_buffer_offset, to_send );
+        local_encode_uint32( &send_buffer_offset, buffer[current_index].time );
+      }
+      
+      reg->to_send_n = 0;
+      
+      return 1;
+   }
+   return 0;
+}
+
+
+void click_registry_send_clear( bool sent_ok )
+{
+   
+}
+
 
 
 const ButtonRegistryBuffer* click_registry_get_action( unsigned int index, unsigned int loop )

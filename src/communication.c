@@ -2,6 +2,32 @@
 #include "main.h"
 
 
+#define CHECK_APP_MESSAGE(fun){\
+   AppMessageResult __macro_res = fun;\
+   if ( __macro_res != APP_MSG_OK ) \
+   { \
+      APP_LOG( APP_LOG_LEVEL_WARNING, "Communication failed: %d", (int)__macro_res); \
+      return;\
+   }};
+
+void communication_send_datas()
+{
+   if ( click_registry_send_has_any() == false )
+      return;
+
+   if (connection_service_peek_pebblekit_connection() == false )
+      return;
+   
+   APP_LOG( APP_LOG_LEVEL_INFO, "Communication ok, proceed with send" ); 
+   
+   DictionaryIterator* dict;
+   
+   CHECK_APP_MESSAGE( app_message_outbox_begin(&dict) );
+   click_registry_send_write( dict );
+   CHECK_APP_MESSAGE( app_message_outbox_send() );
+}
+   
+
 
 static bool local_handle_icon(DictionaryIterator* iter, int loop )
 {
@@ -63,29 +89,23 @@ static void inbox_dropped_callback(AppMessageResult reason, void *context)
   APP_LOG(APP_LOG_LEVEL_ERROR, "Message dropped!");
 }
 
-static void outbox_failed_callback(DictionaryIterator *iterator, AppMessageResult reason, void *context) {
+static void outbox_failed_callback(DictionaryIterator *iterator, AppMessageResult reason, void *context) 
+{
   APP_LOG(APP_LOG_LEVEL_ERROR, "Outbox send failed!");
+  click_registry_send_clear( false );
 }
 
-// static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
-//   APP_LOG(APP_LOG_LEVEL_INFO, "Outbox send success!");
-// }
+static void outbox_sent_callback(DictionaryIterator *iterator, void *context) 
+{
+   APP_LOG(APP_LOG_LEVEL_INFO, "Outbox send success!");
+   click_registry_send_clear( true );
+}
 
 void communication_init()
 {
   app_message_register_inbox_received(inbox_received_callback);
   app_message_register_inbox_dropped(inbox_dropped_callback);
   app_message_register_outbox_failed(outbox_failed_callback);
-//   app_message_register_outbox_sent(outbox_sent_callback);
+  app_message_register_outbox_sent(outbox_sent_callback);
   app_message_open(64, 64);
-}
-
-void communication_send_click( char key, char type )
-{
-  // Send app message
-  DictionaryIterator *iter;
-  app_message_outbox_begin(&iter);
-  dict_write_uint8(iter, COMMUNICATION_KEY_BUTTON, key );
-  dict_write_uint8(iter, COMMUNICATION_KEY_TYPE  , type );
-  app_message_outbox_send();
 }
