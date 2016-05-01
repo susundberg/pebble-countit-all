@@ -44,12 +44,22 @@ static uint8_t LOCAL_send_buffer[(8 * HISTORY_SIZE)]; // each item takes
   if ( __macro_res != DICT_OK )\
   {\
     APP_LOG( APP_LOG_LEVEL_ERROR, "Dict write failed %s:%d (%d)", __FILE__,__LINE__, (int)__macro_res ); \
-    return; \
+    return 0;\
   }}
   
+static void local_encode_uint32( uint32_t* offset, uint32_t data )
+{
+   for (int loop =  0; loop < 4; loop ++ )
+   {
+      uint32_t mask = (0xFF) << (loop*8);
+      LOCAL_send_buffer[ (*offset) + loop ] = (data & mask) >> (loop*8);
+   }
+   *offset += 4;
+}
+
 int click_registry_send_write(DictionaryIterator* dict )
 {
-   unsigned int send_buffer_offset = 0;
+   uint32_t send_buffer_offset = 0;
    
    for (int index = 0; index < BUTTON_N_INDEX; index ++ )
    {
@@ -58,12 +68,13 @@ int click_registry_send_write(DictionaryIterator* dict )
       if ( reg->to_send_n == 0 )
          continue;
       
-      DICT_WRITE_CHECK( dict_write_uint8( dict, COMMUNICATION_KEY_BUTTON_INDEX, (uint8_t)index ) );
+      DICT_WRITE_CHECK( dict_write_uint8( dict, COMM_KEY_BUTTON_INDEX, (uint8_t)index ) );
       
       unsigned int last_index = reg->history.buffer_loop;
       
       for ( unsigned int loop = 0; loop < HISTORY_SIZE; loop ++ )
       {
+         // start from the oldest
          unsigned int current_index = (last_index + loop) % HISTORY_SIZE ;
          
          ButtonRegistryBuffer* buffer = reg->history.buffer;
@@ -87,6 +98,8 @@ int click_registry_send_write(DictionaryIterator* dict )
         local_encode_uint32( &send_buffer_offset, buffer[current_index].time );
       }
       
+      DICT_WRITE_CHECK( dict_write_data( dict, COMM_KEY_BUTTON_DATA, LOCAL_send_buffer, send_buffer_offset ));
+      
       reg->to_send_n = 0;
       
       return 1;
@@ -95,9 +108,23 @@ int click_registry_send_write(DictionaryIterator* dict )
 }
 
 
-void click_registry_send_clear( bool sent_ok )
+void click_registry_send_clear( uint32_t index, bool sent_ok )
 {
-   
+   ButtonRegistry* reg = &LOCAL_registry[index];
+   uint32_t to_send = 0;   
+   ButtonRegistryBuffer* buffer = reg->history.buffer;
+   for ( unsigned int loop = 0; loop < HISTORY_SIZE; loop ++ )
+   {
+      if ( buffer[loop].flags_n_elapsed & BUFFER_FLAG_SENDING ) 
+         buffer[loop].flags_n_elapsed &= ~BUFFER_FLAG_SENDING ;
+
+      if (sent_ok == false )
+      {
+         buffer[loop].flags_n_elapsed |= BUFFER_FLAG_NOT_SENT;
+         to_send += 1;
+      }
+   }
+   reg->to_send_n += to_send;
 }
 
 
@@ -168,8 +195,9 @@ const ButtonRegistryBuffer* local_get_last_action( const ButtonRegistry* reg )
 }
 
 
-static void local_new_action( ButtonRegistryHistory* reg, time_t time_now, uint32_t time_passed, ButtonId button, uint32_t flags )
+static void local_new_action( ButtonRegistry* reg, time_t time_now, uint32_t time_passed, ButtonId button, uint32_t flags )
 {
+   ButtonRegistryHistory* hist = &reg->history;
    if ((time_passed & BUFFER_FLAG_MASK) != 0x00)
    {
       time_passed  = (~BUFFER_FLAG_MASK);
@@ -177,24 +205,25 @@ static void local_new_action( ButtonRegistryHistory* reg, time_t time_now, uint3
    
    flags = flags | BUFFER_FLAG_NOT_SENT;
    
-   reg->buffer_loop = (reg->buffer_loop % HISTORY_SIZE); // Just to be sure there is no overflow, if the history size has changed in versions.
-   reg->buffer[ reg->buffer_loop ].flags_n_elapsed = flags | time_passed;
-   reg->buffer[ reg->buffer_loop ].time    = (uint32_t) time_now;
+   hist->buffer_loop = (hist->buffer_loop % HISTORY_SIZE); // Just to be sure there is no overflow, if the history size has changed in versions.
+   hist->buffer[ hist->buffer_loop ].flags_n_elapsed = flags | time_passed;
+   hist->buffer[ hist->buffer_loop ].time    = (uint32_t) time_now;
    
    if (( flags & BUFFER_FLAG_RUNNING ) == 0x00)
    {
-      reg->buffer_loop += 1;
-      reg->buffer_loop = (reg->buffer_loop % HISTORY_SIZE);
+      hist->buffer_loop += 1;
+      hist->buffer_loop = (hist->buffer_loop % HISTORY_SIZE);
+      reg->to_send_n += 1;
+      communication_request_for_send();
    }
    
    uint32_t storage_key = PERSISTANT_STORAGE_DATA_START + button ;
    
-   int ret = persist_write_data( storage_key, reg, sizeof(ButtonRegistryHistory) );
+   int ret = persist_write_data( storage_key, hist, sizeof(ButtonRegistryHistory) );
    if ( ret != sizeof(ButtonRegistryHistory))
    {
-      APP_LOG( APP_LOG_LEVEL_ERROR, "Writing registry %d failed: %d vs %d", (int)storage_key, ret, sizeof(ButtonRegistryHistory) );   
+      APP_LOG( APP_LOG_LEVEL_ERROR, "Writing hististry %d failed: %d vs %d", (int)storage_key, ret, sizeof(ButtonRegistryHistory) );   
    }
-
 }
 
 static void local_click_handler_single_action( ClickRecognizerRef recognizer, void *context) 
@@ -204,7 +233,7 @@ static void local_click_handler_single_action( ClickRecognizerRef recognizer, vo
   ButtonRegistry* reg = &LOCAL_registry[button_index];
   time_t time_now = time( NULL );
 
-  local_new_action( &reg->history, time_now, 0x00, reg->button_id, 0x00 );
+  local_new_action( reg, time_now, 0x00, reg->button_id, 0x00 );
   main_window_update_elapsed( time_now );
 }
 
@@ -240,7 +269,7 @@ static void local_click_handler_long_action( ClickRecognizerRef recognizer, void
   {
      // No measurement ongoing, start new
      APP_LOG( APP_LOG_LEVEL_DEBUG, "Starte measurement on button %d %d", button_index, (int)time_now );
-     local_new_action( &reg->history, time_now, 0x00, reg->button_id, BUFFER_FLAG_RUNNING  );
+     local_new_action( reg, time_now, 0x00, reg->button_id, BUFFER_FLAG_RUNNING  );
      main_window_update_elapsed( time_now );
      return;
   }
@@ -248,7 +277,7 @@ static void local_click_handler_long_action( ClickRecognizerRef recognizer, void
   APP_LOG( APP_LOG_LEVEL_DEBUG, "Done measurement on button %d %d", button_index, (int)time_started );
   // This is finalization of the measurement
   uint32_t elapsed_long = time_now - time_started;
-  local_new_action( &reg->history, time_now, elapsed_long, reg->button_id, 0x00 );
+  local_new_action( reg, time_started, elapsed_long, reg->button_id, 0x00 );
   
   main_window_update_elapsed( time_now );
 }
@@ -316,6 +345,21 @@ void local_load_buffer_from_storage( ButtonRegistryHistory* reg, uint32_t key_of
 }
 
      
+static uint32_t local_to_send_count( ButtonRegistryHistory* reg )
+{
+   uint32_t to_send = 0;
+   for (int loop = 0; loop < HISTORY_SIZE; loop ++ )
+   {
+      if ( reg->buffer[ loop ].time == 0 )
+         continue;
+      
+      if (( reg->buffer[ loop ].flags_n_elapsed & BUFFER_FLAG_RUNNING ) != 0x00 )
+         continue;
+      
+      to_send += 1;
+   }
+   return to_send;   
+}
 
 void click_registry_init()
 {
@@ -326,9 +370,8 @@ void click_registry_init()
       LOCAL_registry[loop].button_id = click_get_button_id_from_index( loop );
       LOCAL_registry[loop].flags = config_get( LOCAL_registry[loop].button_id );
       local_load_buffer_from_storage( &LOCAL_registry[loop].history, PERSISTANT_STORAGE_DATA_START + LOCAL_registry[loop].button_id );
+      LOCAL_registry[loop].to_send_n = local_to_send_count( &LOCAL_registry[loop].history );
    } 
-   
-   
    
 }
 

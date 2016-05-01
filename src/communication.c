@@ -10,28 +10,55 @@
       return;\
    }};
 
-void communication_send_datas()
-{
-   if ( click_registry_send_has_any() == false )
-      return;
+static time_t LOCAL_time_next_send = 0;
+static bool   LOCAL_js_booted = false;
 
+time_t communication_next_attempt()
+{
+   return LOCAL_time_next_send;
+}
+
+void communication_request_for_send()
+{
+   LOCAL_time_next_send = 0;
+}
+
+
+void communication_send_datas( time_t time_now )
+{
+   APP_LOG( APP_LOG_LEVEL_INFO, "Comm: Check for data send" ); 
+   
+   if ( click_registry_send_has_any() == false )
+   {
+      LOCAL_time_next_send = time_now + 120; // well something large
+      return;
+   }
+   
+   APP_LOG( APP_LOG_LEVEL_INFO, "Comm: We got data" ); 
+   
    if (connection_service_peek_pebblekit_connection() == false )
       return;
    
-   APP_LOG( APP_LOG_LEVEL_INFO, "Communication ok, proceed with send" ); 
+   APP_LOG( APP_LOG_LEVEL_INFO, "Comm: We got connection" ); 
+   if ( LOCAL_js_booted == false )
+      return;
+      
+   APP_LOG( APP_LOG_LEVEL_INFO, "Comm: JS has booted. " ); 
    
    DictionaryIterator* dict;
    
    CHECK_APP_MESSAGE( app_message_outbox_begin(&dict) );
    click_registry_send_write( dict );
    CHECK_APP_MESSAGE( app_message_outbox_send() );
+   
+   LOCAL_time_next_send = time_now + 10;
 }
    
 
 
 static bool local_handle_icon(DictionaryIterator* iter, int loop )
 {
-     Tuple* tuple_icon = dict_find(iter, KEY_BUTTON1_ICON + loop );
+     Tuple* tuple_icon = dict_find(iter, COMM_KEY_BUTTON1_ICON + loop );
      if ( tuple_icon != NULL )
      {
         config_set_icon( click_get_button_id_from_index( loop ), tuple_icon->value->int32 );
@@ -42,7 +69,7 @@ static bool local_handle_icon(DictionaryIterator* iter, int loop )
 
 static bool local_handle_type(DictionaryIterator* iter, int loop )
 {
-     Tuple* tuple_type = dict_find(iter, KEY_BUTTON1_TYPE + loop);
+     Tuple* tuple_type = dict_find(iter, COMM_KEY_BUTTON1_TYPE + loop);
     
      if ( tuple_type != NULL )
      {
@@ -69,16 +96,24 @@ static bool local_handle_type(DictionaryIterator* iter, int loop )
 static void inbox_received_callback(DictionaryIterator* iter, void* context) 
 {
   APP_LOG(APP_LOG_LEVEL_INFO, "Message received!");
-  bool received = false;
+  bool received_config = false;
   for (int loop_button = 0; loop_button < 3; loop_button ++ )
   {
      
-     received |= local_handle_icon( iter, loop_button );
-     received |= local_handle_type( iter, loop_button );
+     received_config |= local_handle_icon( iter, loop_button );
+     received_config |= local_handle_type( iter, loop_button );
   }
   
   
-  if ( received ) 
+  Tuple* tuple_js_boot = dict_find(iter, COMM_KEY_JS_READY );
+  
+  if (tuple_js_boot!=NULL)
+  {
+     APP_LOG(APP_LOG_LEVEL_INFO, "Comm: JS booted ok!");
+     LOCAL_js_booted = true;
+  }
+  
+  if ( received_config ) 
   {
       main_reload_config();  
   }   
@@ -89,16 +124,40 @@ static void inbox_dropped_callback(AppMessageResult reason, void *context)
   APP_LOG(APP_LOG_LEVEL_ERROR, "Message dropped!");
 }
 
-static void outbox_failed_callback(DictionaryIterator *iterator, AppMessageResult reason, void *context) 
+static bool local_get_sent_index(DictionaryIterator *iter, uint8_t* index )
 {
-  APP_LOG(APP_LOG_LEVEL_ERROR, "Outbox send failed!");
-  click_registry_send_clear( false );
+  Tuple* tuple_index = dict_find(iter, COMM_KEY_BUTTON_INDEX );
+  
+  if ( tuple_index == NULL )
+  {
+     APP_LOG(APP_LOG_LEVEL_ERROR, "Outbox send success, but no tuple index!");   
+     return false;
+  }
+  
+  *index = tuple_index->value->uint8;
+  return true; 
 }
 
-static void outbox_sent_callback(DictionaryIterator *iterator, void *context) 
+static void outbox_failed_callback(DictionaryIterator* iter, AppMessageResult reason, void *context) 
 {
-   APP_LOG(APP_LOG_LEVEL_INFO, "Outbox send success!");
-   click_registry_send_clear( true );
+  APP_LOG(APP_LOG_LEVEL_ERROR, "Outbox send failed!");
+  uint8_t index;
+  if ( local_get_sent_index( iter, &index ) == false)
+     return;
+  click_registry_send_clear( index, false );
+}
+
+static void outbox_sent_callback(DictionaryIterator* iter, void *context) 
+{
+  uint8_t index;
+  if ( local_get_sent_index( iter, &index ) == false)
+     return;
+  
+   click_registry_send_clear( index, true );
+   
+   if ( click_registry_send_has_any() == false )
+      return;
+   communication_request_for_send();
 }
 
 void communication_init()

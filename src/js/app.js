@@ -1,6 +1,20 @@
+
+function send_wrapped( dict )
+{
+  Pebble.sendAppMessage( dict, function() 
+  {
+    console.log('Send successful: ' + JSON.stringify(dict));
+  }, function() {
+    console.log('Send failed: ' + JSON.stringify(dict) );
+  });
+}
+
 Pebble.addEventListener('ready', function() 
 {
   console.log('PebbleKit JS ready!');
+  var dict = { KEY_BUTTON_JS_READY : 1 };  
+  send_wrapped( dict );
+  
 });
 
 Pebble.addEventListener('showConfiguration', function() {
@@ -13,13 +27,16 @@ Pebble.addEventListener('showConfiguration', function() {
 function get_icon_number_from_string( str )
 {
    //    "ICON_007.png"
-   console.log("GOT: " + str ) 
    str = str.split("_")[1];
-   console.log("GOT: " + str ) 
    str = str.split(".")[0];
-   console.log("GOT: " + str ) 
    return parseInt(str);
 }
+
+
+Pebble.addEventListener('appmessage', function(e)
+{
+  console.log('Received DATA:' + JSON.stringify(e) );
+});
 
 Pebble.addEventListener('webviewclosed', function(e) {
   var config = JSON.parse(decodeURIComponent(e.response));
@@ -36,10 +53,5 @@ Pebble.addEventListener('webviewclosed', function(e) {
      dict[key_type] = config[ prefix + "-type" ].toUpperCase();
   }
   
-  // Send to watchapp
-  Pebble.sendAppMessage( dict, function() {
-    console.log('Send successful: ' + JSON.stringify(dict));
-  }, function() {
-    console.log('Send failed: ' + JSON.stringify(dict) );
-  });
+  send_wrapped( dict );
 });
