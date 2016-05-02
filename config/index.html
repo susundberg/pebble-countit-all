@@ -152,9 +152,8 @@ function getConfigData()
      var button_name = 'data_button_' + loop ;
      var data_button = document.getElementById(button_name);
      console.log("GOT:" +button_name + " -> " + data_button);
-     data_button.addEventListener( 'click', function() { do_submit( { 'type' : ('data_get_' + loop) } ) } );
+     data_button.addEventListener( 'click', function() { do_submit( { 'type' : 'button_data', 'id' : loop } ) } );
   }
-  
 
   (function() 
   {

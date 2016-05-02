@@ -1,0 +1,54 @@
+<html>
+<head>
+<title> Download data </title>
+<script>
+  
+
+function getQueryParam() 
+{
+    var query = location.search.substring(1);
+    
+    console.log("Data:" + query );
+    query = decodeURIComponent( query );
+    console.log("Data:" + query );
+    var vars = query.split(',');
+    console.log("Vars:" + vars );
+    var data = []
+    for (var i = 0; i < vars.length; i+= 2) 
+    {
+      data.push( [ Number(vars[i]), Number(vars[i+1]), ] );
+    }
+    return data;
+}
+
+
+function getCsvData( data )
+{
+   var csvContent = "data:text/csv;charset=utf-8,";
+   csvContent += "Duration,Epocs\n"
+   data.forEach(function(infoArray, index)
+   {
+      if ( infoArray.length <= 1 )
+      {
+         return;
+      }
+      dataString = infoArray.join(",");
+      csvContent += index < data.length ? dataString + "\n" : dataString;
+   });
+   return csvContent;
+}
+
+var data = getQueryParam();
+console.log("GOT DATA:" + data + " - " + data.length );
+var csv  = getCsvData( data );
+console.log("GOT CSV:" + csv );
+window.open( encodeURI( csv ) );
+
+</script>
+</head>
+
+<body>
+<h3>Download should start automatically. </h3>
+</body>
+
+</html>

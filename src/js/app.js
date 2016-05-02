@@ -1,4 +1,8 @@
 
+
+// var TARGET_HOST = 'https://rawgit.com/susundberg/pebble-countit-all/master/config/';
+var TARGET_HOST = 'http://localhost:8000/';
+
 function send_wrapped( dict )
 {
   Pebble.sendAppMessage( dict, function() 
@@ -18,7 +22,7 @@ Pebble.addEventListener('ready', function()
 });
 
 Pebble.addEventListener('showConfiguration', function() {
-  var url = 'https://rawgit.com/susundberg/pebble-countit-all/master/config/index.html';
+  var url = TARGET_HOST + 'index.html';
   console.log('Showing configuration page: ' + url);
   Pebble.openURL(url);
 });
@@ -107,7 +111,17 @@ Pebble.addEventListener('webviewclosed', function(e) {
   var config = JSON.parse(decodeURIComponent(e.response));
   console.log('Configuration page returned: ' + JSON.stringify( config ));
 
-
+  if ( config["type"] == "button_data" )
+  {
+      var data = [ [100,100000],[100,100000],[100,100000],[100,100000],[100,100000] ];
+      var data_enc = encodeURIComponent( data );
+      var url = TARGET_HOST + "download.html?" + data_enc ;
+      console.log("Download data: "  +url );
+      Pebble.openURL( url ); 
+      return;
+  }
+  
+  
   var dict = {};
   for ( var loop_button = 1; loop_button < 3; loop_button ++ )
   {
