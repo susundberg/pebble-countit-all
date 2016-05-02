@@ -30,20 +30,21 @@ void communication_send_datas( time_t time_now )
    
    if ( click_registry_send_has_any() == false )
    {
+      APP_LOG( APP_LOG_LEVEL_INFO, "Comm: No data, sleep for a long while.." );
       LOCAL_time_next_send = time_now + 120; // well something large
       return;
    }
    
-   APP_LOG( APP_LOG_LEVEL_INFO, "Comm: We got data" ); 
+//    APP_LOG( APP_LOG_LEVEL_INFO, "Comm: We got data" ); 
    
    if (connection_service_peek_pebblekit_connection() == false )
       return;
    
-   APP_LOG( APP_LOG_LEVEL_INFO, "Comm: We got connection" ); 
+//    APP_LOG( APP_LOG_LEVEL_INFO, "Comm: We got connection" ); 
    if ( LOCAL_js_booted == false )
       return;
       
-   APP_LOG( APP_LOG_LEVEL_INFO, "Comm: JS has booted. " ); 
+   APP_LOG( APP_LOG_LEVEL_INFO, "Comm: Sending ... " ); 
    
    DictionaryIterator* dict;
    
@@ -152,7 +153,8 @@ static void outbox_sent_callback(DictionaryIterator* iter, void *context)
   uint8_t index;
   if ( local_get_sent_index( iter, &index ) == false)
      return;
-  
+   
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Outbox send ok: %d!", (int)index );
    click_registry_send_clear( index, true );
    
    if ( click_registry_send_has_any() == false )
@@ -166,5 +168,5 @@ void communication_init()
   app_message_register_inbox_dropped(inbox_dropped_callback);
   app_message_register_outbox_failed(outbox_failed_callback);
   app_message_register_outbox_sent(outbox_sent_callback);
-  app_message_open(64, 64);
+  app_message_open(64,  256 ); 
 }

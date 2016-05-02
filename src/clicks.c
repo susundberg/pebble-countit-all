@@ -165,9 +165,11 @@ void click_registry_clear_finish( unsigned int index)
    
    unsigned int last_index = reg->history.buffer_loop;
    APP_LOG( APP_LOG_LEVEL_INFO, "Clearing index from %d", (int)last_index);   
-      
+   bool had_running_measurement = false;
+   
    for ( unsigned int loop = 0; loop < HISTORY_SIZE; loop ++ )
    {
+      // copy the old data entries, starting from the oldest
       unsigned int current_index = (last_index + loop) % HISTORY_SIZE ;
       
       if ( reg->history.buffer[ current_index ].time == 0 )
@@ -175,7 +177,23 @@ void click_registry_clear_finish( unsigned int index)
       
       APP_LOG( APP_LOG_LEVEL_INFO, "Valid index %d", (int)current_index);   
       new_history.buffer[ new_history.buffer_loop ] = reg->history.buffer[ current_index ];
-      new_history.buffer_loop = (new_history.buffer_loop + 1) % HISTORY_SIZE ;
+      
+      if ( reg->history.buffer[ current_index ].flags_n_elapsed & BUFFER_FLAG_RUNNING )
+      {
+         if ( loop != 0 )
+         {
+            APP_LOG( APP_LOG_LEVEL_ERROR, "Running measurement at index %d -> discard", (int)loop );
+            continue;
+         }
+         had_running_measurement  = true; 
+      }
+      new_history.buffer_loop = (new_history.buffer_loop + 1) % HISTORY_SIZE ;   
+   }
+   
+   if (had_running_measurement)
+   {  // If we had running measurement, copy that to top and clear the floor index.
+      new_history.buffer[ new_history.buffer_loop ] = new_history.buffer[ 0 ];
+      memset( &new_history.buffer[0], 0x00, sizeof( ButtonRegistryBuffer ) );
    }
     
    reg->history = new_history; // shallow copy 
