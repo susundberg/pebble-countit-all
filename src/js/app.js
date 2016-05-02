@@ -1,7 +1,7 @@
 
 
-// var TARGET_HOST = 'https://rawgit.com/susundberg/pebble-countit-all/master/config/';
-var TARGET_HOST = 'http://localhost:8000/';
+var TARGET_HOST = 'https://rawgit.com/susundberg/pebble-countit-all/FEAT/send_data/config/';
+// var TARGET_HOST = 'http://localhost:8000/';
 
 function send_wrapped( dict )
 {
