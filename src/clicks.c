@@ -46,6 +46,9 @@ static uint8_t LOCAL_send_buffer[(8 * HISTORY_SIZE)]; // each item takes
     APP_LOG( APP_LOG_LEVEL_ERROR, "Dict write failed %s:%d (%d)", __FILE__,__LINE__, (int)__macro_res ); \
     return 0;\
   }}
+
+
+  
   
 static void local_encode_uint32( uint32_t* offset, uint32_t data )
 {
@@ -56,6 +59,19 @@ static void local_encode_uint32( uint32_t* offset, uint32_t data )
    }
    *offset += 4;
 }
+
+
+static void local_click_write_storage( uint32_t button, ButtonRegistryHistory* hist )
+{
+   uint32_t storage_key = PERSISTANT_STORAGE_DATA_START + button ;
+   
+   int ret = persist_write_data( storage_key, hist, sizeof(ButtonRegistryHistory) );
+   if ( ret != sizeof(ButtonRegistryHistory))
+   {
+      APP_LOG( APP_LOG_LEVEL_ERROR, "Writing history %d failed: %d vs %d", (int)storage_key, ret, sizeof(ButtonRegistryHistory) );   
+   }
+}
+
 
 int click_registry_send_write(DictionaryIterator* dict )
 {
@@ -125,6 +141,7 @@ void click_registry_send_clear( uint32_t index, bool sent_ok )
       }
    }
    reg->to_send_n += to_send;
+   local_click_write_storage( click_get_button_id_from_index(index), &reg->history); // and write it to presistant storage
 }
 
 
@@ -196,7 +213,8 @@ void click_registry_clear_finish( unsigned int index)
       memset( &new_history.buffer[0], 0x00, sizeof( ButtonRegistryBuffer ) );
    }
     
-   reg->history = new_history; // shallow copy 
+   reg->history = new_history; // shallow copy it to ram
+   local_click_write_storage( click_get_button_id_from_index(index), &new_history ); // and write it to presistant storage
 }
 
 
@@ -211,6 +229,10 @@ const ButtonRegistryBuffer* local_get_last_action( const ButtonRegistry* reg )
       return NULL;
    return ret;
 }
+
+
+
+
 
 
 static void local_new_action( ButtonRegistry* reg, time_t time_now, uint32_t time_passed, ButtonId button, uint32_t flags )
@@ -235,15 +257,10 @@ static void local_new_action( ButtonRegistry* reg, time_t time_now, uint32_t tim
       communication_request_for_send();
    }
    
-   uint32_t storage_key = PERSISTANT_STORAGE_DATA_START + button ;
-   
-   int ret = persist_write_data( storage_key, hist, sizeof(ButtonRegistryHistory) );
-   if ( ret != sizeof(ButtonRegistryHistory))
-   {
-      APP_LOG( APP_LOG_LEVEL_ERROR, "Writing hististry %d failed: %d vs %d", (int)storage_key, ret, sizeof(ButtonRegistryHistory) );   
-   }
+   local_click_write_storage( button, hist );
 }
 
+   
 static void local_click_handler_single_action( ClickRecognizerRef recognizer, void *context) 
 {
   unsigned int button_index = (unsigned int) context;
@@ -286,13 +303,13 @@ static void local_click_handler_long_action( ClickRecognizerRef recognizer, void
   if ( local_duration_measurement_ongoing( reg, &time_started ) == false )
   {
      // No measurement ongoing, start new
-     APP_LOG( APP_LOG_LEVEL_DEBUG, "Starte measurement on button %d %d", button_index, (int)time_now );
+     //      APP_LOG( APP_LOG_LEVEL_DEBUG, "Starte measurement on button %d %d", button_index, (int)time_now );
      local_new_action( reg, time_now, 0x00, reg->button_id, BUFFER_FLAG_RUNNING  );
      main_window_update_elapsed( time_now );
      return;
   }
   
-  APP_LOG( APP_LOG_LEVEL_DEBUG, "Done measurement on button %d %d", button_index, (int)time_started );
+  //   APP_LOG( APP_LOG_LEVEL_DEBUG, "Done measurement on button %d %d", button_index, (int)time_started );
   // This is finalization of the measurement
   uint32_t elapsed_long = time_now - time_started;
   local_new_action( reg, time_started, elapsed_long, reg->button_id, 0x00 );
@@ -371,6 +388,9 @@ static uint32_t local_to_send_count( ButtonRegistryHistory* reg )
       if ( reg->buffer[ loop ].time == 0 )
          continue;
       
+      if (( reg->buffer[ loop ].flags_n_elapsed & BUFFER_FLAG_NOT_SENT ) == 0x00 )
+         continue;
+
       if (( reg->buffer[ loop ].flags_n_elapsed & BUFFER_FLAG_RUNNING ) != 0x00 )
          continue;
       
@@ -389,6 +409,7 @@ void click_registry_init()
       LOCAL_registry[loop].flags = config_get( LOCAL_registry[loop].button_id );
       local_load_buffer_from_storage( &LOCAL_registry[loop].history, PERSISTANT_STORAGE_DATA_START + LOCAL_registry[loop].button_id );
       LOCAL_registry[loop].to_send_n = local_to_send_count( &LOCAL_registry[loop].history );
+      APP_LOG( APP_LOG_LEVEL_DEBUG, "Button %d has %d to send", (int)loop, (int)LOCAL_registry[loop].to_send_n );   
    } 
    
 }

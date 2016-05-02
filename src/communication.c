@@ -26,25 +26,26 @@ void communication_request_for_send()
 
 void communication_send_datas( time_t time_now )
 {
-   APP_LOG( APP_LOG_LEVEL_INFO, "Comm: Check for data send" ); 
-   
    if ( click_registry_send_has_any() == false )
    {
-      APP_LOG( APP_LOG_LEVEL_INFO, "Comm: No data, sleep for a long while.." );
-      LOCAL_time_next_send = time_now + 120; // well something large
+      APP_LOG( APP_LOG_LEVEL_DEBUG, "Comm: No data, sleep for a long while.." );
+      LOCAL_time_next_send = time_now + 60*60; // well something large, 
       return;
    }
    
-//    APP_LOG( APP_LOG_LEVEL_INFO, "Comm: We got data" ); 
+    APP_LOG( APP_LOG_LEVEL_DEBUG, "Comm: We got data" ); 
    
    if (connection_service_peek_pebblekit_connection() == false )
+   {
+      LOCAL_time_next_send = time_now + 60; // retry in 60s
       return;
+   }
    
-//    APP_LOG( APP_LOG_LEVEL_INFO, "Comm: We got connection" ); 
+    APP_LOG( APP_LOG_LEVEL_DEBUG, "Comm: We got connection" ); 
    if ( LOCAL_js_booted == false )
-      return;
+      return; // retry in 1s
       
-   APP_LOG( APP_LOG_LEVEL_INFO, "Comm: Sending ... " ); 
+   APP_LOG( APP_LOG_LEVEL_DEBUG, "Comm: Sending ... " ); 
    
    DictionaryIterator* dict;
    
@@ -96,7 +97,7 @@ static bool local_handle_type(DictionaryIterator* iter, int loop )
 
 static void inbox_received_callback(DictionaryIterator* iter, void* context) 
 {
-  APP_LOG(APP_LOG_LEVEL_INFO, "Message received!");
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Message received!");
   bool received_config = false;
   for (int loop_button = 0; loop_button < 3; loop_button ++ )
   {
@@ -110,7 +111,7 @@ static void inbox_received_callback(DictionaryIterator* iter, void* context)
   
   if (tuple_js_boot!=NULL)
   {
-     APP_LOG(APP_LOG_LEVEL_INFO, "Comm: JS booted ok!");
+     APP_LOG(APP_LOG_LEVEL_DEBUG, "Comm: JS booted ok!");
      LOCAL_js_booted = true;
   }
   
