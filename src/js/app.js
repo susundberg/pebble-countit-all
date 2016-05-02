@@ -107,6 +107,7 @@ Pebble.addEventListener('webviewclosed', function(e) {
   var config = JSON.parse(decodeURIComponent(e.response));
   console.log('Configuration page returned: ' + JSON.stringify( config ));
 
+
   var dict = {};
   for ( var loop_button = 1; loop_button < 3; loop_button ++ )
   {
