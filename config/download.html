@@ -1,6 +1,35 @@
 <html>
 <head>
 <title> Download data </title>
+<link rel='stylesheet' type='text/css' href='css/slate.min.css'>
+</head>
+
+<body>
+<a download="data.csv" id="download_link">Download </a>
+
+<table style="width:100%" id="table_data">
+<thead>
+<tr> <td> Duration </td> <td> Time since epoc </td> </tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+
+
+<div class='item-container'>
+  <div class='button-container'>
+     <a id='submit_button' type='button' class='item-button' value='SAVE'></a>>
+  </div>   
+</div>
+
+</body>
+
+
+
+
+
+
+
 <script>
   
 
@@ -24,6 +53,7 @@ function getQueryParam()
 
 function getCsvData( data )
 {
+   var table = document.getElementById('table_data').getElementsByTagName('tbody')[0];
    var csvContent = "data:text/csv;charset=utf-8,";
    csvContent += "Duration,Epocs\n"
    data.forEach(function(infoArray, index)
@@ -32,6 +62,14 @@ function getCsvData( data )
       {
          return;
       }
+      
+      var newRow   = table.insertRow(-1);
+      var cell_duration  = newRow.insertCell(0);
+      var cell_epoc      = newRow.insertCell(1);
+      
+      cell_duration.innerHTML = infoArray[0];
+      cell_epoc.innerHTML = infoArray[1];
+      console.log("ADD DATA:" + infoArray[0] );
       dataString = infoArray.join(",");
       csvContent += index < data.length ? dataString + "\n" : dataString;
    });
@@ -42,13 +80,10 @@ var data = getQueryParam();
 console.log("GOT DATA:" + data + " - " + data.length );
 var csv  = getCsvData( data );
 console.log("GOT CSV:" + csv );
-window.open( encodeURI( csv ) );
+var encoded_data = encodeURI( csv );
+var link = document.getElementById('download_link');
+link.setAttribute("href", encoded_data);
 
 </script>
-</head>
-
-<body>
-<h3>Download should start automatically. </h3>
-</body>
 
 </html>
