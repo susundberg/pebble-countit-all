@@ -2,6 +2,13 @@
 <head>
 <title> Download data </title>
 <link rel='stylesheet' type='text/css' href='css/slate.min.css'>
+<style>
+.selectable {
+  -webkit-user-select: all !important;
+  -moz-user-select: all !important;
+  -ms-user-select: all !important;
+  user-select: all !important; }
+</style>  
 </head>
 
 <body>
@@ -16,8 +23,9 @@
   <div class='button-container'>
    <a download="data.csv" id="download_link" class='item-button'>Download </a>
   </div>   
-
-  <table style="width:100%" id="table_data">
+  
+    <table style="width:100%;" id="table_data" class='selectable'>
+  
 <thead>
 <tr> <td> Duration </td> <td> Time since epoc </td> </tr>
 </thead>

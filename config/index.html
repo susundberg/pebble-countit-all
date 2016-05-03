@@ -65,6 +65,29 @@
   </label>
 </div>
 
+<div class="item-container">
+  <div class="item-container-header">Button 3 action configuration </div>
+  <div class="item-container-content" id="button3-radio">
+    <label class="item">
+      Single 
+      <input type="radio" class="item-radio" name="button3-radion" value="S" checked >
+    </label>
+    <label class="item">
+      Duration
+      <input type="radio" class="item-radio" name="button3-radion" value="D">
+    </label>
+    <label class="item">
+      Disabled
+      <input type="radio" class="item-radio" name="button3-radion" value="X" >
+    </label>
+  </div>
+  <label class="item">
+    Icon to use
+    <input type="text" class="item-color item-icon" id="button3-icon" value="icon_002.png">
+  </label>
+</div>
+
+
 
 <div class='item-container'>
   <div class='button-container'>
@@ -94,7 +117,7 @@ function getConfigData()
 {
     /// Load the data from the elements to be option hash
     var options = { "type" : "config" };
-    for ( var loop_button = 1; loop_button < 3; loop_button ++ )
+    for ( var loop_button = 1; loop_button <= 3; loop_button ++ )
     {
        var prefix="button" + loop_button;
        console.log("DOING: " + prefix );
@@ -111,7 +134,8 @@ function getConfigData()
          }
        }
        // save for next launch
-       localStorage['config-' + prefix ] = JSON.stringify( { 'icon' : value_icon, 'type' : value_type } );
+       var val = JSON.stringify( { 'icon' : value_icon, 'type' : value_type } );;
+       localStorage.setItem('config-' + prefix, val );
        // set plain dict for easy url-passing
        options[ prefix + "-icon" ] = value_icon;
        options[ prefix + "-type" ] = value_type;
@@ -147,12 +171,16 @@ function getConfigData()
   var clear_button = document.getElementById('data_clear_all');
   clear_button.addEventListener( 'click', function() { do_submit( { 'type' : 'data_clear_all' } ) } );
     
-  for (var loop = 0; loop < 3; loop ++ )
+  for (var loop = 0; loop <= 3; loop ++ )
   {
      var button_name = 'data_button_' + loop ;
      var data_button = document.getElementById(button_name);
-     console.log("GOT:" +button_name + " -> " + data_button);
-     data_button.addEventListener( 'click', function() { do_submit( { 'type' : 'button_data', 'id' : loop } ) } );
+     // thanks javascript, closures are really fun. If you remove this factory function the function will be evalutaed with last loop value. 
+     function fun_factory (loop) 
+     { 
+        return function() { do_submit( { 'type' : 'button_data', 'id' : loop } ); }
+     }
+     data_button.addEventListener( 'click', fun_factory(loop) );
   }
 
   (function() 
@@ -179,14 +207,14 @@ function getConfigData()
     }
     
     // Load any previously saved configuration, if available
-    for ( var loop_button = 1; loop_button < 3; loop_button ++ )
+    for ( var loop_button = 1; loop_button <= 3; loop_button ++ )
     {
        var prefix="button" + loop_button;
-       console.log("LOAD: " + prefix );
-       if(localStorage['config-' + prefix]) 
+       
+       if( localStorage.getItem('config-' + prefix)) 
        {
           console.log("Options found for: " + prefix );
-          var button_options = JSON.parse( localStorage['config-' + prefix] );
+          var button_options = JSON.parse( localStorage.getItem('config-' + prefix) );
           apply_options( prefix, button_options  );
        }
        else

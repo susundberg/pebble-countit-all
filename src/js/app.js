@@ -102,8 +102,9 @@ Pebble.addEventListener('appmessage', function(e)
      console.log("WRITING TO " + local_data + ":" + [since_epoc, duration, ] );
      local_data.push( [since_epoc, duration, ] );  
   }
-  localStorage.setItem('data-button-' + index, JSON.stringify( local_data ) );
-  console.log('Data now:' + JSON.stringify( local_data ) );
+  var key = 'data-button-' + index;
+  localStorage.setItem( key , JSON.stringify( local_data ) );
+  console.log('Data "' + key + '" now:' + JSON.stringify( local_data ) );
 });
 
 
@@ -113,7 +114,11 @@ Pebble.addEventListener('webviewclosed', function(e) {
 
   if ( config["type"] == "button_data" )
   {
-      var data = [ [100,100000],[100,100000],[100,100000],[100,100000],[100,100000] ];
+      var index = parseInt(config["id"]) - 1 ;
+      var key = 'data-button-' + index;
+      
+      var data  = JSON.parse( localStorage.getItem(key) );
+      console.log("Got data data " + key + " : " + data );
       var data_enc = encodeURIComponent( data );
       var url = TARGET_HOST + "download.html?" + data_enc ;
       console.log("Download data: "  +url );
@@ -123,7 +128,7 @@ Pebble.addEventListener('webviewclosed', function(e) {
   
   
   var dict = {};
-  for ( var loop_button = 1; loop_button < 3; loop_button ++ )
+  for ( var loop_button = 1; loop_button <= 3; loop_button ++ )
   {
      var prefix="button" + loop_button;
      
