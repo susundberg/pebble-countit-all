@@ -5,26 +5,35 @@
 </head>
 
 <body>
-<a download="data.csv" id="download_link">Download </a>
 
-<table style="width:100%" id="table_data">
+  
+<div id="container_nodata" class='item-container' style="display:none;" >
+   <div class="item-container-header">No data available </div>
+</div>
+
+<div id="container_download" class='item-container'>
+  <div class="item-container-header">Download data as CSV </div>
+  <div class='button-container'>
+   <a download="data.csv" id="download_link" class='item-button'>Download </a>
+  </div>   
+
+  <table style="width:100%" id="table_data">
 <thead>
 <tr> <td> Duration </td> <td> Time since epoc </td> </tr>
 </thead>
 <tbody>
 </tbody>
 </table>
-
-
-<div class='item-container'>
-  <div class='button-container'>
-     <a id='submit_button' type='button' class='item-button' value='SAVE'></a>>
-  </div>   
 </div>
+
+
+<!--<div class='item-container'>
+  <div class='button-container'>
+     <a id='submit_button' class='item-button'>Download</a>
 
 </body>
 
-
+-->
 
 
 
@@ -37,11 +46,16 @@ function getQueryParam()
 {
     var query = location.search.substring(1);
     
-    console.log("Data:" + query );
+    if (!query)
+    {
+      return [];
+    }
+    
+//     console.log("Data:" + query );
     query = decodeURIComponent( query );
-    console.log("Data:" + query );
+//     console.log("Data:" + query );
     var vars = query.split(',');
-    console.log("Vars:" + vars );
+//     console.log("Vars:" + vars );
     var data = []
     for (var i = 0; i < vars.length; i+= 2) 
     {
@@ -68,8 +82,8 @@ function getCsvData( data )
       var cell_epoc      = newRow.insertCell(1);
       
       cell_duration.innerHTML = infoArray[0];
-      cell_epoc.innerHTML = infoArray[1];
-      console.log("ADD DATA:" + infoArray[0] );
+      cell_epoc.innerHTML     = infoArray[1];
+//       console.log("ADD DATA:" + infoArray[0] );
       dataString = infoArray.join(",");
       csvContent += index < data.length ? dataString + "\n" : dataString;
    });
@@ -77,12 +91,23 @@ function getCsvData( data )
 }
 
 var data = getQueryParam();
-console.log("GOT DATA:" + data + " - " + data.length );
-var csv  = getCsvData( data );
-console.log("GOT CSV:" + csv );
-var encoded_data = encodeURI( csv );
-var link = document.getElementById('download_link');
-link.setAttribute("href", encoded_data);
+
+if ( data.length == 0 )
+{
+   document.getElementById('container_nodata').style.display = null ;
+   document.getElementById('container_download').style.display = "none";
+   
+}
+else
+{
+
+   // console.log("GOT DATA:" + data + " - " + data.length );
+   var csv  = getCsvData( data );
+   // console.log("GOT CSV:" + csv );
+   var encoded_data = encodeURI( csv );
+   var link = document.getElementById('download_link');
+   link.setAttribute("href", encoded_data);
+}
 
 </script>
 
