@@ -60,7 +60,7 @@ void communication_send_datas( time_t time_now )
 
 static bool local_handle_icon(DictionaryIterator* iter, int loop )
 {
-     Tuple* tuple_icon = dict_find(iter, COMM_KEY_BUTTON1_ICON + loop );
+     Tuple* tuple_icon = dict_find(iter, COMM_KEY_BUTTON0_ICON + loop );
      if ( tuple_icon != NULL )
      {
         config_set_icon( click_get_button_id_from_index( loop ), tuple_icon->value->int32 );
@@ -71,7 +71,7 @@ static bool local_handle_icon(DictionaryIterator* iter, int loop )
 
 static bool local_handle_type(DictionaryIterator* iter, int loop )
 {
-     Tuple* tuple_type = dict_find(iter, COMM_KEY_BUTTON1_TYPE + loop);
+     Tuple* tuple_type = dict_find(iter, COMM_KEY_BUTTON0_TYPE + loop);
     
      if ( tuple_type != NULL )
      {

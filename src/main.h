@@ -29,13 +29,13 @@
 #define COMM_KEY_BUTTON_DATA  1001
 #define COMM_KEY_BUTTON_INDEX 1000
 
-#define COMM_KEY_BUTTON1_ICON 100
-// #define KEY_BUTTON2_ICON 101 (done dynamically with loop)
-// #define KEY_BUTTON3_ICON 102 (done dynamically with loop)
+#define COMM_KEY_BUTTON0_ICON 100
+// #define KEY_BUTTON1_ICON 101 (done dynamically with loop)
+// #define KEY_BUTTON2_ICON 102 (done dynamically with loop)
 
-#define COMM_KEY_BUTTON1_TYPE 200
-// #define KEY_BUTTON2_TYPE 201 (done dynamically with loop)
-// #define KEY_BUTTON3_TYPE 202 (done dynamically with loop)
+#define COMM_KEY_BUTTON0_TYPE 200
+// #define KEY_BUTTON1_TYPE 201 (done dynamically with loop)
+// #define KEY_BUTTON2_TYPE 202 (done dynamically with loop)
     
 void main_show_menu_window(unsigned int index);
 void main_reload_config();

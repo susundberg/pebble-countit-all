@@ -128,7 +128,7 @@ Pebble.addEventListener('webviewclosed', function(e) {
   
   
   var dict = {};
-  for ( var loop_button = 1; loop_button <= 3; loop_button ++ )
+  for ( var loop_button = 0; loop_button < 3; loop_button ++ )
   {
      var prefix="button" + loop_button;
      
