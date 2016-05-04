@@ -23,7 +23,7 @@
 
 <div class="item-container">
   <div class="item-container-header">Button 1 action configuration </div>
-  <div class="item-container-content" id="button1-radio">
+  <div class="item-container-content" id="button0-radio">
     <label class="item">
       Single 
       <input type="radio" class="item-radio" name="button1-radion" value="S" checked >
@@ -39,13 +39,13 @@
   </div>
   <label class="item">
     Icon to use
-    <input type="text" class="item-color item-icon" id="button1-icon" value="icon_000.png">
+    <input type="text" class="item-color item-icon" id="button0-icon" value="icon_000.png">
   </label>
 </div>
 
 <div class="item-container">
   <div class="item-container-header">Button 2 action configuration </div>
-  <div class="item-container-content" id="button2-radio">
+  <div class="item-container-content" id="button1-radio">
     <label class="item">
       Single 
       <input type="radio" class="item-radio" name="button2-radion" value="S" checked >
@@ -61,13 +61,13 @@
   </div>
   <label class="item">
     Icon to use
-    <input type="text" class="item-color item-icon" id="button2-icon" value="icon_001.png">
+    <input type="text" class="item-color item-icon" id="button1-icon" value="icon_001.png">
   </label>
 </div>
 
 <div class="item-container">
   <div class="item-container-header">Button 3 action configuration </div>
-  <div class="item-container-content" id="button3-radio">
+  <div class="item-container-content" id="button2-radio">
     <label class="item">
       Single 
       <input type="radio" class="item-radio" name="button3-radion" value="S" checked >
@@ -83,7 +83,7 @@
   </div>
   <label class="item">
     Icon to use
-    <input type="text" class="item-color item-icon" id="button3-icon" value="icon_002.png">
+    <input type="text" class="item-color item-icon" id="button2-icon" value="icon_002.png">
   </label>
 </div>
 
@@ -117,10 +117,9 @@ function getConfigData()
 {
     /// Load the data from the elements to be option hash
     var options = { "type" : "config" };
-    for ( var loop_button = 1; loop_button <= 3; loop_button ++ )
+    for ( var loop_button = 0; loop_button < 3; loop_button ++ )
     {
-       var prefix="button" + loop_button;
-       console.log("DOING: " + prefix );
+       var prefix="button" + (loop_button);
        var value_icon = document.getElementById( prefix + "-icon" ).value;
        var tab = document.getElementById( prefix + "-radio" );
        var selected = tab.getElementsByClassName('item-radio');
@@ -140,7 +139,7 @@ function getConfigData()
        options[ prefix + "-icon" ] = value_icon;
        options[ prefix + "-type" ] = value_type;
     }
-    console.log("GOT:" + JSON.stringify(options) );
+    // console.log("GOT:" + JSON.stringify(options) );
     return options;
 }
 
@@ -171,9 +170,9 @@ function getConfigData()
   var clear_button = document.getElementById('data_clear_all');
   clear_button.addEventListener( 'click', function() { do_submit( { 'type' : 'data_clear_all' } ) } );
     
-  for (var loop = 0; loop <= 3; loop ++ )
+  for (var loop = 0; loop < 3; loop ++ )
   {
-     var button_name = 'data_button_' + loop ;
+     var button_name = 'data_button_' + (loop) ;
      var data_button = document.getElementById(button_name);
      // thanks javascript, closures are really fun. If you remove this factory function the function will be evalutaed with last loop value. 
      function fun_factory (loop) 
@@ -207,9 +206,9 @@ function getConfigData()
     }
     
     // Load any previously saved configuration, if available
-    for ( var loop_button = 1; loop_button <= 3; loop_button ++ )
+    for ( var loop_button = 0; loop_button < 3; loop_button ++ )
     {
-       var prefix="button" + loop_button;
+       var prefix="button" + (loop_button);
        
        if( localStorage.getItem('config-' + prefix)) 
        {
