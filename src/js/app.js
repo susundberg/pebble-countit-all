@@ -112,6 +112,18 @@ Pebble.addEventListener('webviewclosed', function(e) {
   var config = JSON.parse(decodeURIComponent(e.response));
   console.log('Configuration page returned: ' + JSON.stringify( config ));
 
+  
+  if ( config["type"] == "data_clear_all" )
+  {
+     for ( var index = 0; index < 3; index++ )
+     {
+        var key = 'data-button-' + index;
+        localStorage.setItem(key,"");
+        console.log("Clear data on " + key );
+     }
+     return;
+  }
+  
   if ( config["type"] == "button_data" )
   {
       var index = parseInt(config["id"]) - 1 ;
@@ -126,17 +138,22 @@ Pebble.addEventListener('webviewclosed', function(e) {
       return;
   }
   
-  
-  var dict = {};
-  for ( var loop_button = 0; loop_button < 3; loop_button ++ )
+  if ( config["type"] == "config" )
   {
-     var prefix="button" + loop_button;
-     
-     var key_icon = ("key_" + prefix+"_icon").toUpperCase();
-     var key_type = ("key_" + prefix+"_type").toUpperCase();
-     dict[key_icon] = get_icon_number_from_string( config[ prefix + "-icon" ].toUpperCase() );
-     dict[key_type] = config[ prefix + "-type" ].toUpperCase();
+      var dict = {};
+      for ( var loop_button = 0; loop_button < 3; loop_button ++ )
+      {
+         var prefix="button" + loop_button;
+         
+         var key_icon = ("key_" + prefix+"_icon").toUpperCase();
+         var key_type = ("key_" + prefix+"_type").toUpperCase();
+         dict[key_icon] = get_icon_number_from_string( config[ prefix + "-icon" ].toUpperCase() );
+         dict[key_type] = config[ prefix + "-type" ].toUpperCase();
+      }
+      send_wrapped( dict );
+      return;
   }
   
-  send_wrapped( dict );
+  console.log("Unknown return!");
+  
 });
