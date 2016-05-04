@@ -109,6 +109,11 @@ Pebble.addEventListener('appmessage', function(e)
 
 
 Pebble.addEventListener('webviewclosed', function(e) {
+  if ( !e.response )
+  {
+     console.log('Got nothing from closed!'); 
+     return;
+  }
   var config = JSON.parse(decodeURIComponent(e.response));
   console.log('Configuration page returned: ' + JSON.stringify( config ));
 
@@ -126,10 +131,14 @@ Pebble.addEventListener('webviewclosed', function(e) {
   
   if ( config["type"] == "button_data" )
   {
-      var index = parseInt(config["id"]) - 1 ;
+      var index = parseInt(config["id"]);
       var key = 'data-button-' + index;
       
       var data  = JSON.parse( localStorage.getItem(key) );
+      
+      if ( !data )
+         data = [];
+      
       console.log("Got data data " + key + " : " + data );
       var data_enc = encodeURIComponent( data );
       var url = TARGET_HOST + "download.html?" + data_enc ;
