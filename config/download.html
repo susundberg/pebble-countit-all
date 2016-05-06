@@ -18,19 +18,34 @@
 </div>
 
 <div id="container_download" class='item-container'>
-  <div class="item-container-header">Download data as CSV </div>
-  <div class='button-container'>
-   <a download="data.csv" id="download_link" class='item-button'>Download </a>
+
+<div class="item-container-header">Get the data</div>
+  <div class="item-container-content">
+    <div class="item tab-buttons">
+      <a download="data.csv" id="download_link"  name="tab-1" class="tab-button">Download</a>
+      <a id="follow_link" name="tab-1" class="tab-button ">Open in browser</a>
+    </div>
+  </div>
+</div>
+
+
+<!--  <div class="item-container-header">Download data as CSV </div>
+     <div class='button-container'>
+     <a class='item-button'>Download </a>
   </div>   
   
-    <table style="width:100%;" id="table_data" class='selectable'>
+  <div class="item-container-header">Open in browser</div>
+     <div class='button-container'>
+     <a class='item-button'>Open in browser</a>
+  </div>-->
   
-<thead>
-<tr> <td> Seconds since epoc </td> <td> Duration </td> </tr>
-</thead>
-<tbody>
-</tbody>
-</table>
+ <table style="width:100%;" id="table_data" class='selectable'>
+   <thead>
+   <tr> <td> Seconds since epoc </td> <td> Duration </td> </tr>
+   </thead>
+   <tbody>
+   </tbody>
+ </table>
 </div>
 
 
@@ -42,10 +57,8 @@
 <script>
   
 
-function getQueryParam() 
+function getQueryParam(query) 
 {
-    var query = location.search.substring(1);
-    
     if (!query)
     {
       return [];
@@ -90,7 +103,9 @@ function getCsvData( data )
    return csvContent;
 }
 
-var data = getQueryParam();
+/// ========== MAIN HERE ========================
+var query = location.search.substring(1);
+var data = getQueryParam(query);
 
 if ( data.length == 0 )
 {
@@ -107,6 +122,8 @@ else
    var encoded_data = encodeURI( csv );
    var link = document.getElementById('download_link');
    link.setAttribute("href", encoded_data);
+   link = document.getElementById('follow_link');
+   link.href = link.href + "?" + query;
 }
 
 </script>
