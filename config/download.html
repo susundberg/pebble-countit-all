@@ -23,11 +23,15 @@
   <div class="item-container-content">
     <div class="item tab-buttons">
       <a download="data.csv" id="download_link"  name="tab-1" class="tab-button">Download</a>
-      <a id="follow_link" name="tab-1" class="tab-button ">Open in browser</a>
+      <a id="follow_link" name="tab-1" class="tab-button">Open in browser</a>
+      <a href="https://www.google.com/" name="tab-1" class="tab-button">Google </a>
     </div>
   </div>
 </div>
 
+
+<a id="follow_link2" >Direct link</a>
+<a href="https://www.google.com/" >Google link</a>
 
 <!--  <div class="item-container-header">Download data as CSV </div>
      <div class='button-container'>
@@ -124,6 +128,10 @@ else
    link.setAttribute("href", encoded_data);
    link = document.getElementById('follow_link');
    link.href = link.href + "?" + query;
+
+    link = document.getElementById('follow_link2');
+    link.href = link.href + "?" + query;
+   
 }
 
 </script>
