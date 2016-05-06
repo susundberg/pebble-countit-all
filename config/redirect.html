@@ -1,0 +1,19 @@
+<html>
+<head>
+<title> Download data </title>
+<link rel='stylesheet' type='text/css' href='css/slate.min.css'>
+</head>
+<body>
+<div id="container_nodata" class='item-container'>
+   <div class="item-container-header"> <a id="link_target" href="download.html?"> Redirecting </a> </div>
+</div>
+
+<script>
+var link  = document.getElementById('link_target');
+var query = location.search.substring(1);
+var url   = link.href + query;
+link.href=url;
+link.click();
+</script>
+</body>
+</html>

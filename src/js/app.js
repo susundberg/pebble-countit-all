@@ -141,7 +141,9 @@ Pebble.addEventListener('webviewclosed', function(e) {
       
       console.log("Got data data " + key + " : " + data );
       var data_enc = encodeURIComponent( data );
-      var url = TARGET_HOST + "download.html?" + data_enc ;
+      // use redirect page since we want to get the think opened in a browser, since at least on android version the
+      // pebble build in webview is unable to a) hande download b) copy text
+      var url = TARGET_HOST + "redirect.html?" + data_enc ;
       console.log("Download data: "  +url );
       Pebble.openURL( url ); 
       return;
