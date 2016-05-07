@@ -1,14 +1,14 @@
 <html>
 <head>
 <title> Download data </title>
-<!--<link rel='stylesheet' type='text/css' href='css/slate.min.css'>
+<link rel='stylesheet' type='text/css' href='css/slate.min.css'>
 <style>
 .selectable {
   -webkit-user-select: all !important;
   -moz-user-select: all !important;
   -ms-user-select: all !important;
   user-select: all !important; }
-</style>  -->
+</style>  
 </head>
 
 <body>
@@ -18,37 +18,14 @@
 </div>
 
 <div id="container_download" class='item-container'>
+  <div class="item-container-header">Get the data </div>
 
-<div class="item-container-header">Get the data</div>
-  <div class="item-container-content">
-    <div class="item tab-buttons">
-      <a download="data.csv" id="download_link"  name="tab-1" class="tab-button">Download</a>
-      <a id="follow_link" name="tab-1" class="tab-button">Open in browser</a>
-      <a href="https://www.google.com/" name="tab-1" class="tab-button">Google </a>
-    </div>
-  </div>
+
 </div>
-
-
-<a id="follow_link2" >Direct link</a>
-<a href="https://www.google.com/" >Google link</a>
-<a href="http://www.google.com/" >Google link no http</a>
-<a href="#" onclick="window.open('http://www.google.com', '_blank');"> New windowlink blank</a>
-<a href="#" onclick="window.open('http://www.google.com', '_system');"> New windowlink system</a>
-
-<!--  <div class="item-container-header">Download data as CSV </div>
-     <div class='button-container'>
-     <a class='item-button'>Download </a>
-  </div>   
-  
-  <div class="item-container-header">Open in browser</div>
-     <div class='button-container'>
-     <a class='item-button'>Open in browser</a>
-  </div>-->
   
  <table style="width:100%;" id="table_data" class='selectable'>
    <thead>
-   <tr> <td> Seconds since epoc </td> <td> Duration </td> </tr>
+   <tr> <td> Clicked </td> <td> Duration (sec) </td> <td> Since epoc (sec) </td> </tr>
    </thead>
    <tbody>
    </tbody>
@@ -56,14 +33,16 @@
 </div>
 
 
-
-
-
-
+  <div class="item-container-header">These seems not working</div> 
+  <div class="item-container-content">
+    <div class="item tab-buttons">
+      <a id="download_link"  name="tab-1" class="tab-button" download="data.csv"  >Download</a>
+      <a id="follow_link" name="tab-1" class="tab-button">Open in browser</a>
+    </div>
+  </div>
 
 <script>
   
-
 function getQueryParam(query) 
 {
     if (!query)
@@ -85,6 +64,25 @@ function getQueryParam(query)
 }
 
 
+function format_datestring( date_string )
+{
+   console.log("GOT:" + date_string );
+   var date = new Date( 0 );
+   date.setUTCSeconds( date_string );
+   console.log("GOT:" + date );
+   
+   function zp(str)
+   {
+      str=str.toString();
+      if (str.length < 2)
+      { return "0" + str; }
+      return str;
+      
+      
+   }
+   return date.getFullYear() + "-" + zp(date.getMonth()) + "-" + zp(date.getDate()) + " " + zp(date.getHours()) + ":" + zp(date.getMinutes()) + ":" +  zp(date.getSeconds()) ;
+}
+
 function getCsvData( data )
 {
    var table = document.getElementById('table_data').getElementsByTagName('tbody')[0];
@@ -98,12 +96,14 @@ function getCsvData( data )
       }
       
       var newRow   = table.insertRow(-1);
-      var cell_duration  = newRow.insertCell(0);
-      var cell_epoc      = newRow.insertCell(1);
+      var cell_date     = newRow.insertCell(-1);
+      var cell_duration  = newRow.insertCell(-1);
+      var cell_epoc      = newRow.insertCell(-1);
       
-      cell_duration.innerHTML = infoArray[0];
-      cell_epoc.innerHTML     = infoArray[1];
-//       console.log("ADD DATA:" + infoArray[0] );
+      cell_date.innerHTML     = format_datestring( infoArray[0] );
+      cell_duration.innerHTML = infoArray[1];
+      cell_epoc.innerHTML     = infoArray[0];
+      
       dataString = infoArray.join(",");
       csvContent += index < data.length ? dataString + "\n" : dataString;
    });
@@ -132,9 +132,6 @@ else
    link = document.getElementById('follow_link');
    link.href = link.href + "?" + query;
 
-    link = document.getElementById('follow_link2');
-    link.href = link.href + "?" + query;
-   
 }
 
 </script>
