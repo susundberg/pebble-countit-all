@@ -1,7 +1,7 @@
 <html>
 <head>
 <title> Download data </title>
-<!-- <link rel='stylesheet' type='text/css' href='css/slate.min.css'> -->
+<link rel='stylesheet' type='text/css' href='css/slate.min.css'> 
 <style>
 .selectable {
   -webkit-user-select: all !important;
@@ -19,28 +19,27 @@
 
 <div id="container_download" class='item-container'>
   <div class="item-container-header">Get the data </div>
-
-  <a href="https://www.dropbox.com/s/qmocfrco2t0d28o/Fluffbeast.docx?dl=1"> DROPBOX FILE RAW </a>
-  <a href="http://pastebin.com/raw/bjGa5CT4" download="foo.txt"> Pastebin raw file </a>
-  
- <table style="width:100%;" id="table_data" class='selectable'>
+ 
+   <table style="width:100%;" id="table_data" class='selectable'>
    <thead>
    <tr> <td> Clicked </td> <td> Duration (sec) </td> <td> Since epoc (sec) </td> </tr>
    </thead>
    <tbody>
    </tbody>
  </table>
+ You can copy paste this to somewhere!
 </div>
 
 
-  <div class="item-container-header">These seems not working</div> 
+  <div class="item-container-header"> Get the data </div> 
+   The download link will work only in native browser! Open the link with native browser (copy-paste).
+   
     <div class="item-container-content">
     <div class="item tab-buttons">
-      <a id="download_link"  name="tab-1" class="tab-button" download="data.csv"  >Download</a>
-      <a id="follow_link" name="tab-1" class="tab-button">Open in browser</a>
+      <a id="download_link"  name="tab-1" class="tab-button" download="data.csv" >Download </a>
     </div>
   </div>
-
+  <a id="follow_link" name="tab-1" class="tab-button"> </a>
 <script>
   
 function getQueryParam(query) 
@@ -131,7 +130,7 @@ else
    link.setAttribute("href", encoded_data);
    link = document.getElementById('follow_link');
    link.href = link.href + "?" + query;
-
+   link.text = link.href;
 }
 
 </script>
