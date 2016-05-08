@@ -9,8 +9,9 @@
 
 
 #define BUFFER_FLAG_MASK        0xF0000000 
-#define BUFFER_FLAG_NOT_SENT    0x10000000  // This value has not been sent to phone
-#define BUFFER_FLAG_RUNNING     0x20000000  // This entry is duration that has been started but not ended
+#define BUFFER_FLAG_RUNNING     0x10000000  // This entry is duration that has been started but not ended
+#define BUFFER_FLAG_NOT_SENT    0x20000000  // This value has not been sent to phone
+#define BUFFER_FLAG_SENDING     0x40000000  // This value has been sent, but not acked yet.
 
 #define BUFFER_HISTORY_ELAPSED(x) ((x)&(~BUFFER_FLAG_MASK))
 
@@ -22,13 +23,19 @@
 #define PERSISTANT_STORAGE_CONFIG_START 100
 
 
-#define KEY_BUTTON1_ICON 100
-// #define KEY_BUTTON2_ICON 101 (done dynamically with loop)
-// #define KEY_BUTTON3_ICON 102 (done dynamically with loop)
 
-#define KEY_BUTTON1_TYPE 200
-// #define KEY_BUTTON2_TYPE 201 (done dynamically with loop)
-// #define KEY_BUTTON3_TYPE 202 (done dynamically with loop)
+
+#define COMM_KEY_JS_READY     1
+#define COMM_KEY_BUTTON_DATA  1001
+#define COMM_KEY_BUTTON_INDEX 1000
+
+#define COMM_KEY_BUTTON0_ICON 100
+// #define KEY_BUTTON1_ICON 101 (done dynamically with loop)
+// #define KEY_BUTTON2_ICON 102 (done dynamically with loop)
+
+#define COMM_KEY_BUTTON0_TYPE 200
+// #define KEY_BUTTON1_TYPE 201 (done dynamically with loop)
+// #define KEY_BUTTON2_TYPE 202 (done dynamically with loop)
     
 void main_show_menu_window(unsigned int index);
 void main_reload_config();
@@ -61,6 +68,14 @@ void click_registry_clear( unsigned int index, unsigned int loop );
 /** Finish it */
 void click_registry_clear_finish( unsigned int index );
 
+/** @returns true if there are some values to be sent */
+bool click_registry_send_has_any();
+
+/** Write all unsent data (or at most given size) */
+int click_registry_send_write(DictionaryIterator* dict );
+/** Clear the beeing sent flag to either sent_ok or not_sent status based on @param sent_ok */
+void click_registry_send_clear( uint32_t index, bool sent_ok );
+
 /** @returns the @param loop 'th action from the @param index buffer or NULL if the action has not been taken */
 const ButtonRegistryBuffer* click_registry_get_action( unsigned int index, unsigned int loop );
 
@@ -91,13 +106,13 @@ void config_set_icon ( ButtonId button_id, uint32_t icon_id );
 
 /** Functions implemented in communication.c */
 
-#define COMMUNICATION_KEY_CONFIG 200
-#define COMMUNICATION_KEY_TYPE   1
-#define COMMUNICATION_KEY_BUTTON 2
 
 /// Init
 void communication_init();
 /// Send click event 
 void communication_send_click( char key, char type );
+time_t communication_next_attempt();
+void communication_send_datas( time_t time_now );
+void communication_request_for_send();
 
 #endif

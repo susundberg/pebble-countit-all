@@ -1,0 +1,140 @@
+<html>
+<head>
+<title> Download data </title>
+<link rel='stylesheet' type='text/css' href='css/slate.min.css'> 
+<style>
+.selectable {
+  -webkit-user-select: all !important;
+  -moz-user-select: all !important;
+  -ms-user-select: all !important;
+  user-select: all !important; }
+</style>  
+</head>
+
+<body>
+
+<div id="container_nodata" class='item-container' style="display:none;" >
+   <div class="item-container-header">No data available </div>
+</div>
+
+<div id="container_download" class='item-container'>
+
+  <div class="item-container-header">Get the data </div>
+ 
+   <table style="width:100%;" id="table_data" class='selectable'>
+   <thead>
+   <tr> <td> Clicked </td> <td> Duration (sec) </td> <td> Since epoc (sec) </td> </tr>
+   </thead>
+   <tbody>
+   </tbody>
+ </table>
+ You can copy paste this to somewhere!
+
+
+  <div class="item-container-header"> Get the data </div> 
+  The download link will work only in native browser! Open the link with native browser (copy-paste).
+   
+    <div class="item-container-content">
+      <div class="item tab-buttons">
+        <a id="download_link"  name="tab-1" class="tab-button" download="data.csv" >Download </a>
+     </div>
+    </div>
+  <a id="follow_link"> </a>
+</div>
+  
+<script>
+  
+function getQueryParam(query) 
+{
+    if (!query)
+    {
+      return [];
+    }
+    
+//     console.log("Data:" + query );
+    query = decodeURIComponent( query );
+//     console.log("Data:" + query );
+    var vars = query.split(',');
+//     console.log("Vars:" + vars );
+    var data = []
+    for (var i = 0; i < vars.length; i+= 2) 
+    {
+      data.push( [ Number(vars[i]), Number(vars[i+1]), ] );
+    }
+    return data;
+}
+
+
+function format_datestring( date_string )
+{
+   console.log("GOT:" + date_string );
+   var date = new Date( 0 );
+   date.setUTCSeconds( date_string );
+   console.log("GOT:" + date );
+   
+   function zp(str)
+   {
+      str=str.toString();
+      if (str.length < 2)
+      { return "0" + str; }
+      return str;
+      
+      
+   }
+   return date.getFullYear() + "-" + zp(date.getMonth()) + "-" + zp(date.getDate()) + " " + zp(date.getHours()) + ":" + zp(date.getMinutes()) + ":" +  zp(date.getSeconds()) ;
+}
+
+function getCsvData( data )
+{
+   var table = document.getElementById('table_data').getElementsByTagName('tbody')[0];
+   var csvContent = "data:text/csv;charset=utf-8,";
+   csvContent += "Duration,Epocs\n"
+   data.forEach(function(infoArray, index)
+   {
+      if ( infoArray.length <= 1 )
+      {
+         return;
+      }
+      
+      var newRow   = table.insertRow(-1);
+      var cell_date     = newRow.insertCell(-1);
+      var cell_duration  = newRow.insertCell(-1);
+      var cell_epoc      = newRow.insertCell(-1);
+      
+      cell_date.innerHTML     = format_datestring( infoArray[0] );
+      cell_duration.innerHTML = infoArray[1];
+      cell_epoc.innerHTML     = infoArray[0];
+      
+      dataString = infoArray.join(",");
+      csvContent += index < data.length ? dataString + "\n" : dataString;
+   });
+   return csvContent;
+}
+
+/// ========== MAIN HERE ========================
+var query = location.search.substring(1);
+var data = getQueryParam(query);
+
+if ( data.length == 0 )
+{
+   document.getElementById('container_nodata').style.display = null ;
+   document.getElementById('container_download').style.display = "none";
+   
+}
+else
+{
+
+   // console.log("GOT DATA:" + data + " - " + data.length );
+   var csv  = getCsvData( data );
+   // console.log("GOT CSV:" + csv );
+   var encoded_data = encodeURI( csv );
+   var link = document.getElementById('download_link');
+   link.setAttribute("href", encoded_data);
+   link = document.getElementById('follow_link');
+   link.href = link.href + "?" + query;
+   link.text = link.href;
+}
+
+</script>
+</body>
+</html>

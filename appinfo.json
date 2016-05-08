@@ -14,15 +14,15 @@
     "configurable"
   ],
   "appKeys": {
-    "KEY_BUTTON1_ICON": 100,
-    "KEY_BUTTON2_ICON": 101,
-    "KEY_BUTTON3_ICON": 102,
-    "KEY_BUTTON1_TYPE": 200,
-    "KEY_BUTTON2_TYPE": 201,
-    "KEY_BUTTON3_TYPE": 202,
-    "KEY_BUTTON1_DATA": 500,
-    "KEY_BUTTON2_DATA": 501,
-    "KEY_BUTTON3_DATA": 502 
+    "KEY_BUTTON_JS_READY" : 1,
+    "KEY_BUTTON0_ICON": 100,
+    "KEY_BUTTON1_ICON": 101,
+    "KEY_BUTTON2_ICON": 102,
+    "KEY_BUTTON0_TYPE": 200,
+    "KEY_BUTTON1_TYPE": 201,
+    "KEY_BUTTON2_TYPE": 202,
+    "KEY_BUTTON_INDEX": 1000,
+    "KEY_BUTTON_DATA" : 1001 
     },
     
   "resources": {
@@ -305,11 +305,6 @@
    {
       "file" : "images/icon_055.png",
       "name" : "ICON_055",
-      "type" : "png"
-   },
-   {
-      "file" : "images/icon_056.png",
-      "name" : "ICON_056",
       "type" : "png"
    }
    ]

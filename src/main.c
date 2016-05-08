@@ -16,6 +16,10 @@ static void local_time_event_handler(struct tm *tick_time, TimeUnits units_chang
 {
    time_t time_now = time( NULL );
    main_window_update_elapsed( time_now );
+   
+   if ( time_now >= communication_next_attempt() )
+      communication_send_datas( time_now );
+   
 }
 
 
