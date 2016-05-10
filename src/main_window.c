@@ -219,7 +219,12 @@ void main_window_update_elapsed( time_t time_now )
    {
       unsigned int elapsed_sec;
       unsigned int time_started;
-      if ( click_registry_get_elapsed( time_now, loop, &elapsed_sec, &time_started ) == true )
+      if ( click_registry_enabled( loop ) == false )
+      {
+         text_layer_set_text( LOCAL_layers[loop].layer, "" );
+         text_layer_set_text( LOCAL_layers_small[loop].layer, ""  );
+      }
+      else if ( click_registry_get_elapsed( time_now, loop, &elapsed_sec, &time_started ) == true )
       {
          local_show_running_time( &LOCAL_layers[loop], elapsed_sec );
          local_show_datetime(  &LOCAL_layers_small[loop], "Started at ", time_started, "" );

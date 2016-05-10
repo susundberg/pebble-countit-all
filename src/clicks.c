@@ -221,10 +221,12 @@ void click_registry_clear_finish( unsigned int index)
 const ButtonRegistryBuffer* local_get_last_action( const ButtonRegistry* reg )
 {
    unsigned int buffer_prev = reg->history.buffer_loop - 1;
+   
    if ( buffer_prev >= HISTORY_SIZE )
       buffer_prev = HISTORY_SIZE - 1;
    
    const ButtonRegistryBuffer* ret = &reg->history.buffer[buffer_prev];
+   
    if ( ret->time == 0 )
       return NULL;
    return ret;
@@ -448,6 +450,8 @@ bool click_registry_get_elapsed( time_t time_now, unsigned int index, unsigned i
 bool click_registry_get_since_last( time_t time_now, unsigned int index, unsigned int* elapsed, unsigned int* action_time )
 {
    ButtonRegistry* reg = &LOCAL_registry[index];
+   
+   
    const ButtonRegistryBuffer* loop = local_get_last_action( reg );
    if ( loop == NULL )
       return false;
