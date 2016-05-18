@@ -100,34 +100,12 @@ void menu_window_set_data( unsigned int index )
 typedef struct
 {
    uint64_t sum_x;
-   uint64_t sum_x2; // x^2
+//    uint64_t sum_x2; // for std x^2 - left here to reason the structure existance.
 } Calculateor_AvgStd;
-
-
-uint32_t isqrt_iterative(uint64_t const n)
-{
-    uint64_t xk = n;
-    if (n == 0) return 0;
-    if (n == 18446744073709551615ULL) return 4294967295U;
-    do
-    {
-        uint64_t const xk1 = (xk + n / xk) / 2;
-        if (xk1 >= xk)
-        {
-            return xk;
-        }
-        else
-        {
-            xk = xk1;
-        }
-    } while (1);
-}
-
 
 static void local_calculator_register_value( Calculateor_AvgStd* calc, uint32_t value )
 {
    calc->sum_x  += value;
-   calc->sum_x2 += value*value;
 }
 
 static float local_calculator_get_avg_value( const Calculateor_AvgStd* calc, uint32_t count )
@@ -135,34 +113,20 @@ static float local_calculator_get_avg_value( const Calculateor_AvgStd* calc, uin
    return (float)calc->sum_x / (float)count;
 }
 
-static float local_calculator_get_std_value( const Calculateor_AvgStd* calc, uint32_t count )
-{
-   uint64_t upper = count * calc->sum_x2 - calc->sum_x*calc->sum_x;
-   uint64_t lower = count * (count - 1);
-   if ( count <= 1 )
-      return 0.0f;
-   uint32_t isqrt = isqrt_iterative( upper/ lower );
-   return (float) isqrt;
-}
 
 
 static void local_print_buffer_avg_std( const Calculateor_AvgStd* calc, uint32_t count, char* buffer )
 {
    unsigned int avg_value_s = (unsigned int)(local_calculator_get_avg_value( calc, count ) + 0.5f);
-   unsigned int std_value_s = (unsigned int)(local_calculator_get_std_value( calc, count ) + 0.5f);
-   
    unsigned int avg_value_m;
-   unsigned int std_value_m;
+   unsigned int avg_value_h;
    
-   get_time_splitted( NULL, &avg_value_m, &avg_value_s );
-   get_time_splitted( NULL, &std_value_m, &std_value_s );
+   get_time_splitted( &avg_value_h, &avg_value_m, &avg_value_s );
    
-   APP_LOG( APP_LOG_LEVEL_INFO, "avg %02d:%02d std %02d:%02d",  avg_value_m,avg_value_s, std_value_m,std_value_s  );
+   APP_LOG( APP_LOG_LEVEL_INFO, "avg %02d:%02d:%02d",  avg_value_h, avg_value_m,avg_value_s );
    
    // avg 99:99 std 12:12
-   CHECK_BUFFER_N_PRINT( MENU_ENTRY_SIZE_LARGE, snprintf( buffer, MENU_ENTRY_SIZE_LARGE, "avg %02d:%02d std %02d:%02d", 
-                                                          avg_value_m,avg_value_s, 
-                                                          std_value_m,std_value_s ) );
+   CHECK_BUFFER_N_PRINT( MENU_ENTRY_SIZE_LARGE, snprintf( buffer, MENU_ENTRY_SIZE_LARGE, "avg %02d:%02d:%02d",  avg_value_h, avg_value_m,avg_value_s ));  
 }
 
 
@@ -233,7 +197,7 @@ static void local_load_data( )
    
    if ( nvalids > 1 )
    {
-      CHECK_BUFFER_PRINT( snprintf( LOCAL_menu_action_texts, MENU_ENTRY_SIZE, "Interval (min)"));
+      CHECK_BUFFER_PRINT( snprintf( LOCAL_menu_action_texts, MENU_ENTRY_SIZE, "Interval:"));
       local_print_buffer_avg_std( &intervals, nvalids - 1, LOCAL_menu_action_texts_small );
    }
    else
@@ -244,7 +208,7 @@ static void local_load_data( )
    
     if ( ( flags & BUTTONTYPE_FLAG_DURATION ) && nvalids > 0 )
     {
-      CHECK_BUFFER_PRINT( snprintf( LOCAL_menu_action_texts + MENU_ENTRY_SIZE, MENU_ENTRY_SIZE, "Duration (min)"));
+      CHECK_BUFFER_PRINT( snprintf( LOCAL_menu_action_texts + MENU_ENTRY_SIZE, MENU_ENTRY_SIZE, "Duration:"));
       local_print_buffer_avg_std( &durations, nvalids, LOCAL_menu_action_texts_small + MENU_ENTRY_SIZE_LARGE );
     }
     else
