@@ -134,7 +134,16 @@ Pebble.addEventListener('webviewclosed', function(e) {
       var index = parseInt(config["id"]);
       var key = 'data-button-' + index;
       
-      var data  = JSON.parse( localStorage.getItem(key) );
+      var data  = null; 
+      
+      try
+      {
+         data = JSON.parse( localStorage.getItem(key) );
+      }
+      catch (e)
+      {
+         console.log("Loading failed: " + e );
+      }
       
       if ( !data )
          data = [];
