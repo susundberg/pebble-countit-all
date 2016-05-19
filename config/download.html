@@ -131,7 +131,7 @@ else
    var dl_link = document.getElementById('download_link');
    dl_link.setAttribute("href", encoded_data);
    var follow_link = document.getElementById('follow_link');
-   var url = link.href + "?" + query;
+   var url = dl_link.href + "?" + query;
    follow_link.innerHTML = url ;
 }
 
