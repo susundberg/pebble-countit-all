@@ -30,7 +30,7 @@
  </table>
  You can copy paste this to somewhere!
 
-
+<!--
   <div class="item-container-header"> Get the data </div> 
   The download link will work only in native browser! Open the link with native browser (copy-paste).
    
@@ -40,7 +40,7 @@
      </div>
     </div>
   <div id="follow_link" class="selectable"> </div>
-</div>
+</div>-->
   
 <script>
   
@@ -127,12 +127,14 @@ else
    // console.log("GOT DATA:" + data + " - " + data.length );
    var csv  = getCsvData( data );
    // console.log("GOT CSV:" + csv );
+   /* Disable the download button as its not working, and disable the follow link since its so bad
    var encoded_data = encodeURI( csv );
    var dl_link = document.getElementById('download_link');
    dl_link.setAttribute("href", encoded_data);
    var follow_link = document.getElementById('follow_link');
    var url = dl_link.href + "?" + query;
    follow_link.innerHTML = url ;
+   */
 }
 
 </script>
